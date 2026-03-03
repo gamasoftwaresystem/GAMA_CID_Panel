@@ -1,0 +1,295 @@
+[
+    {
+        "drone_id": "GAMA-01",
+        "timestamp": "2026-02-21T11:05:24Z",
+        "status": {
+            "mode": "AUTO",
+            "armed": true,
+            "health": "GOOD",
+            "battery_pct": 82,
+            "signal_dbm": -65,
+            "mission_state": "DELIVERING"
+        },
+        "navigation": {
+            "lat": 41.045,
+            "lon": 28.985,
+            "alt_relative": 12.5,
+            "ground_speed": 4.2,
+            "heading": 90
+        },
+        "ai_analytics": {
+            "detections": [
+                {
+                    "class": "person",
+                    "confidence": 0.89,
+                    "bbox": [
+                        120,
+                        45,
+                        200,
+                        310
+                    ]
+                }
+            ],
+            "target_locked": true
+        },
+        "sensors": {
+            "lidar_min_dist": 2.4,
+            "cpu_temp": 48
+        },
+        "fleet_mission": {
+            "start_point": [
+                28.985,
+                41.045
+            ],
+            "end_point": [
+                29.0285,
+                41.0694
+            ],
+            "route": [
+                [
+                    28.985,
+                    41.045
+                ],
+                [
+                    29.002,
+                    41.056
+                ],
+                [
+                    29.0285,
+                    41.0694
+                ]
+            ]
+        }
+    },
+    {
+        "drone_id": "GAMA-02",
+        "timestamp": "2026-02-21T11:05:25Z",
+        "status": {
+            "mode": "MANUAL",
+            "armed": true,
+            "health": "GOOD",
+            "battery_pct": 45,
+            "signal_dbm": -72,
+            "mission_state": "PICKUP"
+        },
+        "navigation": {
+            "lat": 41.075,
+            "lon": 29.01,
+            "alt_relative": 45,
+            "ground_speed": 12.5,
+            "heading": 180
+        },
+        "ai_analytics": {
+            "detections": [],
+            "target_locked": false
+        },
+        "sensors": {
+            "lidar_min_dist": 15,
+            "cpu_temp": 52
+        },
+        "fleet_mission": {
+            "start_point": [
+                29.01,
+                41.075
+            ],
+            "end_point": [
+                29.017,
+                41.1189
+            ],
+            "route": [
+                [
+                    29.01,
+                    41.075
+                ],
+                [
+                    29.017,
+                    41.1189
+                ]
+            ]
+        }
+    },
+    {
+        "drone_id": "GAMA-03",
+        "timestamp": "2026-02-21T11:05:26Z",
+        "status": {
+            "mode": "RTL",
+            "armed": true,
+            "health": "WARNING",
+            "battery_pct": 18,
+            "signal_dbm": -85,
+            "mission_state": "RETURNING"
+        },
+        "navigation": {
+            "lat": 41.042,
+            "lon": 29.006,
+            "alt_relative": 80,
+            "ground_speed": 15,
+            "heading": 270
+        },
+        "ai_analytics": {
+            "detections": [],
+            "target_locked": false
+        },
+        "sensors": {
+            "lidar_min_dist": 30.5,
+            "cpu_temp": 65
+        },
+        "fleet_mission": {
+            "start_point": [
+                29.006,
+                41.042
+            ],
+            "end_point": [
+                28.9918,
+                41.0693
+            ],
+            "route": [
+                [
+                    29.006,
+                    41.042
+                ],
+                [
+                    28.9918,
+                    41.0693
+                ]
+            ]
+        }
+    },
+    {
+        "drone_id": "GAMA-04",
+        "timestamp": "2026-02-21T11:05:27Z",
+        "status": {
+            "mode": "AUTO",
+            "armed": true,
+            "health": "GOOD",
+            "battery_pct": 95,
+            "signal_dbm": -55,
+            "mission_state": "PICKUP"
+        },
+        "navigation": {
+            "lat": 41.065,
+            "lon": 28.995,
+            "alt_relative": 120,
+            "ground_speed": 18,
+            "heading": 45
+        },
+        "ai_analytics": {
+            "detections": [],
+            "target_locked": false
+        },
+        "sensors": {
+            "lidar_min_dist": 40,
+            "cpu_temp": 42
+        },
+        "fleet_mission": {
+            "start_point": [
+                28.995,
+                41.065
+            ],
+            "end_point": [
+                28.9654,
+                41.0873
+            ],
+            "route": [
+                [
+                    28.995,
+                    41.065
+                ],
+                [
+                    28.9654,
+                    41.0873
+                ]
+            ]
+        }
+    },
+    {
+        "drone_id": "MED-01",
+        "timestamp": "2026-02-21T11:05:28Z",
+        "status": {
+            "mode": "AUTO",
+            "armed": true,
+            "health": "GOOD",
+            "battery_pct": 78,
+            "signal_dbm": -68,
+            "mission_state": "DELIVERING"
+        },
+        "navigation": {
+            "lat": 40.985,
+            "lon": 29.025,
+            "alt_relative": 150,
+            "ground_speed": 22.5,
+            "heading": 0
+        },
+        "ai_analytics": {
+            "detections": [],
+            "target_locked": false
+        },
+        "sensors": {
+            "lidar_min_dist": 50,
+            "cpu_temp": 46
+        },
+        "fleet_mission": {
+            "start_point": [
+                29.025,
+                40.985
+            ],
+            "end_point": [
+                29.018,
+                40.9386
+            ],
+            "route": [
+                [
+                    29.025,
+                    40.985
+                ],
+                [
+                    29.018,
+                    40.9386
+                ]
+            ]
+        }
+    },
+    {
+        "drone_id": "HVY-X9",
+        "timestamp": "2026-02-21T11:05:29Z",
+        "status": {
+            "mode": "MANUAL",
+            "armed": true,
+            "health": "WARNING",
+            "battery_pct": 32,
+            "signal_dbm": -78,
+            "mission_state": "RETURNING"
+        },
+        "navigation": {
+            "lat": 41.025,
+            "lon": 29.015,
+            "alt_relative": 65,
+            "ground_speed": 8,
+            "heading": 220
+        },
+        "sensors": {
+            "lidar_min_dist": 12,
+            "cpu_temp": 68
+        },
+        "fleet_mission": {
+            "start_point": [
+                29.015,
+                41.025
+            ],
+            "end_point": [
+                28.968,
+                41.011
+            ],
+            "route": [
+                [
+                    29.015,
+                    41.025
+                ],
+                [
+                    28.968,
+                    41.011
+                ]
+            ]
+        }
+    }
+]
