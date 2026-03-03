@@ -10,6 +10,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.2.1",
     "@tauri-apps/api": "^2.10.1",
     "@tauri-apps/plugin-opener": "^2",
     "@tensorflow-models/coco-ssd": "^2.2.3",
@@ -22,14 +23,14 @@
     "react-map-gl": "^7.1.6"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.0",
+    "@tailwindcss/postcss": "^4.2.1",
     "@tauri-apps/cli": "^2",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
-    "autoprefixer": "^10.4.24",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.2.0",
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.1",
     "typescript": "~5.8.3",
     "vite": "^7.0.4"
   }
