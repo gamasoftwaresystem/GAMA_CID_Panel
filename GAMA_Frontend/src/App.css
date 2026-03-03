@@ -39,7 +39,6 @@
 .glass-panel {
   background-color: var(--color-hud-panel);
   backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--color-hud-border);
   border-radius: 1.5rem;
   box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
@@ -48,7 +47,6 @@
 .glass-pill {
   background-color: var(--color-hud-panel);
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--color-hud-border);
   border-radius: 9999px;
 }
