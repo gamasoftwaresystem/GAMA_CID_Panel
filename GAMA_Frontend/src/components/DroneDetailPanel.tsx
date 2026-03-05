@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Drone } from '../types';
-import { AlertTriangle, Battery, Maximize2, X, Activity, Navigation } from 'lucide-react';
+import { AlertTriangle, Battery, Maximize2, X, Activity } from 'lucide-react';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import '@tensorflow/tfjs';
 
@@ -193,71 +193,108 @@ export default function DroneDetailPanel({ drone, onClose }: DroneDetailProps) {
             </div>
 
             <div className="flex-1 flex w-full h-[calc(100%-56px)] bg-black/20">
-                {/* Sidebar Stats Area */}
-                <div className="w-[280px] bg-black/30 flex flex-col justify-between overflow-y-auto custom-scrollbar border-r border-white/5 p-5 z-10">
+                {/* Sidebar Stats Area - Tactical Readout */}
+                <div className="w-[280px] bg-black/40 backdrop-blur-xl flex flex-col overflow-y-auto custom-scrollbar border-r border-white/5 p-5 z-10">
                     <div className="space-y-6">
-                        <div className="bg-black/40 p-4 rounded-xl border border-white/5 space-y-3">
-                            <div className="flex justify-between items-center text-xs">
-                                <span className="text-hud-text-muted flex items-center"><Navigation className="w-3.5 h-3.5 mr-2" /> Altitude</span>
-                                <span className="font-mono text-white font-bold">{drone.navigation.alt_relative.toFixed(1)} m</span>
-                            </div>
-                            <div className="flex justify-between items-center text-xs">
-                                <span className="text-hud-text-muted flex items-center"><Activity className="w-3.5 h-3.5 mr-2" /> Speed</span>
-                                <span className="font-mono text-white font-bold">{drone.navigation.ground_speed.toFixed(1)} km/h</span>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-hud-text-muted mb-2 border-b border-white/5 pb-1">System Vital</h3>
-                            <div className="space-y-2">
-                                <div className="bg-black/30 p-3 rounded-xl border border-white/5 flex justify-between items-center">
-                                    <div className="flex items-center space-x-2">
-                                        <Battery className="w-3.5 h-3.5 text-hud-accent" />
-                                        <span className="text-[10px] text-hud-text-muted uppercase tracking-wider font-semibold">Battery</span>
+                        {/* Primary Telemetry */}
+                        <div className="space-y-3">
+                            <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-hud-accent/40 mb-2 flex items-center">
+                                <Activity className="w-2.5 h-2.5 mr-2" /> Live Telemetry
+                            </h3>
+                            <div className="grid grid-cols-1 gap-2">
+                                <div className="bg-white/[0.02] p-3 rounded-xl border border-white/5 flex items-center justify-between">
+                                    <div className="flex flex-col">
+                                        <span className="text-[8px] font-bold text-hud-text-muted uppercase tracking-widest">Altitude (AGL)</span>
+                                        <span className="text-lg font-black text-white font-mono">{drone.navigation.alt_relative.toFixed(1)}<span className="text-[10px] ml-1 opacity-30">M</span></span>
                                     </div>
-                                    <span className="text-xs font-mono text-white">{drone.status.battery_pct.toFixed(1)}%</span>
+                                    <div className="w-16 h-1 bg-white/5 rounded-full overflow-hidden">
+                                        <div className="h-full bg-hud-accent/60" style={{ width: `${Math.min((drone.navigation.alt_relative / 120) * 100, 100)}%` }}></div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white/[0.02] p-3 rounded-xl border border-white/5 flex items-center justify-between">
+                                    <div className="flex flex-col">
+                                        <span className="text-[8px] font-bold text-hud-text-muted uppercase tracking-widest">Ground Speed</span>
+                                        <span className="text-lg font-black text-white font-mono">{drone.navigation.ground_speed.toFixed(1)}<span className="text-[10px] ml-1 opacity-30">KM/H</span></span>
+                                    </div>
+                                    <div className="w-16 h-1 bg-white/5 rounded-full overflow-hidden">
+                                        <div className="h-full bg-hud-accent/60" style={{ width: `${Math.min((drone.navigation.ground_speed / 60) * 100, 100)}%` }}></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div>
-                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-hud-text-muted mb-2 border-b border-white/5 pb-1">Intelligence</h3>
-                            <div className="bg-black/30 p-3 rounded-xl border border-white/5 flex flex-col mb-3">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-[9px] text-hud-text-muted uppercase tracking-wider font-semibold">Target Lock</span>
-                                    <Activity className={`w-4 h-4 ${drone.ai_analytics.target_locked ? 'text-hud-danger animate-pulse' : 'text-hud-text-muted'}`} />
+                        {/* System Power */}
+                        <div className="space-y-3">
+                            <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-hud-accent/40 mb-2 flex items-center">
+                                <Battery className="w-2.5 h-2.5 mr-2" /> Power Source
+                            </h3>
+                            <div className="bg-black/20 p-4 rounded-xl border border-white/5">
+                                <div className="flex justify-between items-center mb-3">
+                                    <span className="text-xl font-black text-white font-mono">{drone.status.battery_pct.toFixed(0)}%</span>
+                                    <span className={`text-[8px] font-black px-1.5 py-0.5 rounded border ${drone.status.battery_pct > 20 ? 'text-hud-accent/80 border-hud-accent/10' : 'text-hud-danger border-hud-danger/20 animate-pulse'}`}>
+                                        {drone.status.battery_pct > 20 ? 'STABLE' : 'CRITICAL'}
+                                    </span>
                                 </div>
-                                <span className={`text-xs font-bold ${drone.ai_analytics.target_locked ? 'text-hud-danger' : 'text-white/70'}`}>
-                                    {drone.ai_analytics.target_locked ? 'ENGAGED' : 'SEARCHING'}
-                                </span>
-                            </div>
-
-                            <div className="bg-black/30 p-3 rounded-xl border border-white/5 min-h-20">
-                                <span className="text-[9px] text-hud-text-muted uppercase tracking-wider font-semibold flex items-center mb-2">
-                                    Detections ({drone.ai_analytics.detections.length})
-                                </span>
-                                {drone.ai_analytics.detections.length > 0 ? (
-                                    <div className="space-y-1.5">
-                                        {drone.ai_analytics.detections.map((det, idx) => (
-                                            <div key={idx} className="flex justify-between items-center bg-white/5 p-1.5 rounded">
-                                                <span className="text-[10px] uppercase font-bold text-hud-accent">{det.class}</span>
-                                                <span className="text-[10px] font-mono text-white/50">{Math.round(det.confidence * 100)}%</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-[10px] text-hud-text-muted/50 italic text-center mt-4">No threats detected</p>
-                                )}
+                                <div className="flex gap-0.5 h-1.5">
+                                    {[...Array(10)].map((_, i) => (
+                                        <div
+                                            key={i}
+                                            className={`flex-1 rounded-sm transition-all duration-700 ${drone.status.battery_pct > (i * 10)
+                                                ? (drone.status.battery_pct < 20 ? 'bg-hud-danger/80' : 'bg-hud-accent/60')
+                                                : 'bg-white/5'}`}
+                                        />
+                                    ))}
+                                </div>
                             </div>
                         </div>
 
-                        <div>
-                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-hud-danger mb-3 border-b border-hud-danger/20 pb-1 flex items-center">
-                                <AlertTriangle className="w-3 h-3 mr-1.5 text-hud-danger" /> Emergency Protocols
+                        {/* Intelligence Feed */}
+                        <div className="space-y-3">
+                            <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-hud-accent/40 mb-2 flex items-center">
+                                <Activity className="w-2.5 h-2.5 mr-2" /> AI Analytics
                             </h3>
                             <div className="space-y-2">
-                                <button onClick={() => setIsKilled(true)} className="w-full bg-hud-danger/20 hover:bg-hud-danger/40 border border-hud-danger/40 text-hud-danger py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all">Kill Switch</button>
+                                <div className={`p-3 rounded-xl border transition-all ${drone.ai_analytics.target_locked ? 'bg-hud-danger/5 border-hud-danger/20' : 'bg-white/[0.01] border-white/5'}`}>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[8px] font-black uppercase tracking-widest text-hud-text-muted">Target Recognition</span>
+                                        <span className={`text-[9px] font-black tracking-widest uppercase ${drone.ai_analytics.target_locked ? 'text-hud-danger' : 'text-white/40'}`}>
+                                            {drone.ai_analytics.target_locked ? 'LOCKED' : 'IDLE'}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="bg-black/10 rounded-xl border border-white/5 p-3">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-[8px] font-bold text-hud-text-muted uppercase tracking-widest">Detections</span>
+                                        <span className="text-[9px] font-mono text-hud-accent/60 font-bold">{drone.ai_analytics.detections.length} NODES</span>
+                                    </div>
+                                    <div className="space-y-1.5 max-h-32 overflow-y-auto custom-scrollbar pr-1">
+                                        {drone.ai_analytics.detections.length > 0 ? (
+                                            drone.ai_analytics.detections.map((det, idx) => (
+                                                <div key={idx} className="flex justify-between items-center bg-white/5 p-1.5 rounded-lg border border-white/5">
+                                                    <span className="text-[9px] uppercase font-bold text-white/60">{det.class}</span>
+                                                    <span className="text-[8px] font-mono text-hud-accent/40">{Math.round(det.confidence * 100)}%</span>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="py-2 opacity-20 text-center">
+                                                <span className="text-[8px] font-bold uppercase tracking-widest italic">Scanning...</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+
+                        {/* Emergency Commands */}
+                        <div className="pt-4 mt-auto">
+                            <button
+                                onClick={() => setIsKilled(true)}
+                                className="w-full bg-hud-danger/5 hover:bg-hud-danger/10 border border-hud-danger/20 py-3 rounded-xl transition-all active:scale-95 group"
+                            >
+                                <span className="text-[9px] font-black text-hud-danger/60 group-hover:text-hud-danger uppercase tracking-[0.2em]">Terminate Session</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -278,13 +315,70 @@ export default function DroneDetailPanel({ drone, onClose }: DroneDetailProps) {
                         {/* OpenCV Overlay Canvas */}
                         <canvas
                             ref={overlayRef}
-                            className="absolute inset-0 z-30 pointer-events-none"
+                            className="absolute inset-0 z-30 pointer-events-none mix-blend-screen"
                         />
 
                         {/* Invisible processing canvas */}
                         <canvas ref={canvasRef} className="hidden" />
 
-                        <div className="absolute inset-0 pointer-events-none opacity-20 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+                        {/* HUD Scanline Effect */}
+                        <div className="absolute inset-0 pointer-events-none z-40 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] bg-[size:100%_4px,3px_100%]"></div>
+
+                        {/* Static Noise Overlay */}
+                        <div className="absolute inset-0 pointer-events-none z-40 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+
+                        {/* Vignette */}
+                        <div className="absolute inset-0 pointer-events-none z-40 shadow-[inset_0_0_150px_rgba(0,0,0,0.8)] border-[20px] border-black/10"></div>
+
+                        {/* Tactical HUD Overlays - Top Corners */}
+                        <div className="absolute inset-0 pointer-events-none z-40 flex flex-col justify-between p-6">
+                            <div className="flex justify-between items-start">
+                                <div className="flex flex-col border-l-2 border-hud-accent/60 pl-4 bg-black/20 backdrop-blur-sm p-4 rounded-r-xl border-y border-r border-white/5">
+                                    <span className="text-[9px] font-black text-hud-accent uppercase tracking-[0.3em] mb-1">Optical Feed</span>
+                                    <div className="flex items-center space-x-4">
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] text-white/50 leading-tight">RES: 3840x2160</span>
+                                            <span className="text-[10px] text-white/50 leading-tight">FPS: 60.00</span>
+                                        </div>
+                                        <div className="flex items-center space-x-1.5 bg-hud-danger/20 px-2 py-0.5 rounded border border-hud-danger/40 animate-pulse">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-hud-danger"></div>
+                                            <span className="text-[8px] font-black text-hud-danger uppercase">REC</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="text-right border-r-2 border-hud-accent/60 pr-4 bg-black/20 backdrop-blur-sm p-4 rounded-l-xl border-y border-l border-white/5">
+                                    <span className="text-[10px] font-mono text-hud-accent/80 font-bold block">41.0082° N</span>
+                                    <span className="text-[10px] font-mono text-hud-accent/80 font-bold block">28.9784° E</span>
+                                    <span className="text-[10px] font-mono text-white/40 block mt-1 uppercase">Sat-Fix: Good</span>
+                                </div>
+                            </div>
+
+                            {/* Mission Status Center Bottom (Floating) */}
+                            <div className="flex justify-center">
+                                <div className="bg-black/60 backdrop-blur-md px-8 py-3 rounded-full border border-white/10 flex items-center space-x-10 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-[8px] text-white/40 uppercase font-black tracking-widest mb-1">Heading</span>
+                                        <span className="text-sm font-mono text-hud-accent font-black">284° NW</span>
+                                    </div>
+                                    <div className="w-px h-8 bg-white/10"></div>
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-[8px] text-white/40 uppercase font-black tracking-widest mb-1">Mission Phase</span>
+                                        <span className="text-sm text-white font-black uppercase tracking-widest">{drone.status.mission_state}</span>
+                                    </div>
+                                    <div className="w-px h-8 bg-white/10"></div>
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-[8px] text-white/40 uppercase font-black tracking-widest mb-1">Signal</span>
+                                        <div className="flex space-x-0.5 mt-1">
+                                            {[...Array(4)].map((_, i) => (
+                                                <div key={i} className={`w-1 h-2 rounded-full ${i < 3 ? 'bg-hud-accent' : 'bg-white/10'}`}></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="absolute inset-0 pointer-events-none opacity-10 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:100px_100px]"></div>
 
                         {/* Kill Switch Overlay */}
                         {isKilled && (
@@ -294,21 +388,6 @@ export default function DroneDetailPanel({ drone, onClose }: DroneDetailProps) {
                                 <p className="text-white/80 font-mono tracking-widest shadow-black drop-shadow-lg">SYSTEM TERMINATED</p>
                             </div>
                         )}
-
-                        <div className="absolute top-4 left-4 flex space-x-3 z-40">
-                            <div className="bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 flex space-x-3 text-[10px] uppercase font-bold tracking-widest text-white shadow-xl">
-                                <span className="text-hud-accent">HDR</span>
-                                <span className="w-px bg-white/20"></span>
-                                <span>4K - 60 FPS</span>
-                            </div>
-                        </div>
-
-                        <div className="absolute top-4 right-4 flex space-x-3 z-40">
-                            <div className="bg-hud-danger/80 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-hud-danger flex space-x-2 text-[10px] uppercase font-bold tracking-widest text-white shadow-xl animate-pulse">
-                                <span className="w-2 h-2 rounded-full bg-white self-center"></span>
-                                <span>REC 00:02:24</span>
-                            </div>
-                        </div>
                     </div>
 
                     {isManualMode && (
@@ -320,76 +399,78 @@ export default function DroneDetailPanel({ drone, onClose }: DroneDetailProps) {
 
                                 {/* Left Stick: Movement */}
                                 <div className="flex flex-col items-center">
-                                    <span className="text-[10px] text-hud-text-muted font-bold tracking-widest uppercase mb-4 opacity-80">Movement</span>
-                                    <div className="w-28 h-28 rounded-full border-2 border-white/20 bg-white/5 relative flex items-center justify-center shadow-inner">
-                                        <div className="absolute w-full h-[1px] bg-white/10"></div>
+                                    <div className="w-32 h-32 rounded-full border-2 border-white/10 bg-black/40 relative flex items-center justify-center shadow-inner group">
+                                        <div className="absolute inset-2 rounded-full border border-white/[0.03]"></div>
+                                        <div className="absolute w-full h-px bg-white/5"></div>
+                                        <div className="absolute w-px h-full bg-white/5"></div>
                                         {/* Left Joystick head */}
                                         <div
                                             onPointerDown={(e) => handleJoyMove(e, 'left')}
                                             onPointerMove={(e) => handleJoyMove(e, 'left')}
                                             onPointerUp={(e) => handleJoyEnd(e, 'left')}
                                             onPointerCancel={(e) => handleJoyEnd(e, 'left')}
-                                            className="w-10 h-10 rounded-full bg-[#1e40af] shadow-[0_4px_15px_rgba(0,0,0,0.5)] cursor-grab active:cursor-grabbing border border-blue-400/50 flex items-center justify-center absolute transition-none touch-none"
+                                            className="w-14 h-14 rounded-full bg-gradient-to-br from-hud-accent/20 to-hud-accent/5 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.8)] cursor-grab active:cursor-grabbing border-2 border-hud-accent/40 flex items-center justify-center absolute transition-none touch-none z-20 group-active:border-hud-accent"
                                             style={{ transform: `translate(${joyLeft.x}px, ${joyLeft.y}px)` }}>
-                                            <div className="w-4 h-4 rounded-full bg-blue-400"></div>
+                                            <div className="w-4 h-4 rounded-full bg-hud-accent shadow-[0_0_15px_var(--color-hud-accent)]"></div>
                                         </div>
                                     </div>
-                                    <span className="text-[10px] text-white/50 font-bold tracking-widest mt-4">Roll / Pitch</span>
+                                    <span className="text-[9px] text-hud-accent/60 font-black tracking-[0.2em] mt-4 uppercase">Pitch / Roll</span>
                                 </div>
 
-                                {/* Center Gauges */}
-                                <div className="flex space-x-6 items-center translate-y-2">
+                                {/* Center Gauges - Tactical Design */}
+                                <div className="flex space-x-8 items-center bg-black/20 p-6 rounded-[2rem] border border-white/5 backdrop-blur-md">
                                     {/* Pitch Gauge */}
                                     <div className="flex flex-col items-center">
-                                        <div className="w-20 h-20 rounded-full border-[6px] border-white/10 border-t-[#3b82f6] bg-black/40 flex items-center justify-center shadow-[inset_0_4px_10px_rgba(0,0,0,0.5)] mb-3 transition-transform duration-75"
-                                            style={{ transform: `rotate(${-joyLeft.y}deg)` }}>
-                                            <span className="text-sm font-mono font-bold text-white transition-transform duration-75" style={{ transform: `rotate(${joyLeft.y}deg)` }}>
-                                                {((-joyLeft.y / 35) * 15).toFixed(1)}°
-                                            </span>
+                                        <div className="relative w-24 h-24">
+                                            <svg className="w-full h-full -rotate-90">
+                                                <circle cx="48" cy="48" r="42" fill="none" stroke="currentColor" strokeWidth="4" className="text-white/5" />
+                                                <circle cx="48" cy="48" r="42" fill="none" stroke="currentColor" strokeWidth="4" strokeDasharray="264" strokeDashoffset={264 - (Math.abs(joyLeft.y) / 35) * 264} className="text-blue-500 transition-all duration-75" />
+                                            </svg>
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <span className="text-lg font-mono font-black text-white">
+                                                    {((-joyLeft.y / 35) * 45).toFixed(0)}°
+                                                </span>
+                                            </div>
                                         </div>
-                                        <span className="text-[9px] text-white/50 font-bold tracking-widest uppercase">Pitch</span>
-                                    </div>
-
-                                    {/* Roll Gauge */}
-                                    <div className="flex flex-col items-center">
-                                        <div className="w-20 h-20 rounded-full border-[6px] border-white/10 border-r-[#22c55e] bg-black/40 flex items-center justify-center shadow-[inset_0_4px_10px_rgba(0,0,0,0.5)] mb-3 transition-transform duration-75"
-                                            style={{ transform: `rotate(${joyLeft.x}deg)` }}>
-                                            <span className="text-sm font-mono font-bold text-white transition-transform duration-75" style={{ transform: `rotate(${-joyLeft.x}deg)` }}>
-                                                {((joyLeft.x / 35) * 15).toFixed(1)}°
-                                            </span>
-                                        </div>
-                                        <span className="text-[9px] text-white/50 font-bold tracking-widest uppercase">Roll</span>
+                                        <span className="text-[10px] text-white/40 font-black tracking-widest uppercase mt-2">Pitch</span>
                                     </div>
 
                                     {/* Yaw Gauge */}
                                     <div className="flex flex-col items-center">
-                                        <div className="w-20 h-20 rounded-full border-[6px] border-white/10 border-l-[#ef4444] bg-black/40 flex items-center justify-center shadow-[inset_0_4px_10px_rgba(0,0,0,0.5)] mb-3 transition-transform duration-75"
-                                            style={{ transform: `rotate(${joyRight.x}deg)` }}>
-                                            <span className="text-sm font-mono font-bold text-white transition-transform duration-75" style={{ transform: `rotate(${-joyRight.x}deg)` }}>
-                                                {((joyRight.x / 35) * 15).toFixed(1)}°
-                                            </span>
+                                        <div className="relative w-24 h-24">
+                                            <svg className="w-full h-full -rotate-90">
+                                                <circle cx="48" cy="48" r="42" fill="none" stroke="currentColor" strokeWidth="4" className="text-white/5" />
+                                                <circle cx="48" cy="48" r="42" fill="none" stroke="currentColor" strokeWidth="4" strokeDasharray="264" strokeDashoffset={264 - (Math.abs(joyRight.x) / 35) * 264} className="text-hud-accent transition-all duration-75" />
+                                            </svg>
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <span className="text-lg font-mono font-black text-white">
+                                                    {((joyRight.x / 35) * 45).toFixed(0)}°
+                                                </span>
+                                            </div>
                                         </div>
-                                        <span className="text-[9px] text-white/50 font-bold tracking-widest uppercase">Yaw</span>
+                                        <span className="text-[10px] text-white/40 font-black tracking-widest uppercase mt-2">Yaw</span>
                                     </div>
                                 </div>
 
                                 {/* Right Stick: Camera */}
                                 <div className="flex flex-col items-center">
-                                    <span className="text-[10px] text-hud-text-muted font-bold tracking-widest uppercase mb-4 opacity-80">Camera</span>
-                                    <div className="w-28 h-28 rounded-full border-2 border-white/20 bg-white/5 relative flex items-center justify-center shadow-inner">
-                                        <div className="absolute w-full h-[1px] bg-white/10"></div>
+                                    <span className="text-[10px] text-hud-text-muted font-black tracking-[0.3em] uppercase mb-4 opacity-80">Gimbal Logic</span>
+                                    <div className="w-32 h-32 rounded-full border-2 border-white/10 bg-black/40 relative flex items-center justify-center shadow-inner group">
+                                        <div className="absolute inset-2 rounded-full border border-white/[0.03]"></div>
+                                        <div className="absolute w-full h-px bg-white/5"></div>
+                                        <div className="absolute w-px h-full bg-white/5"></div>
                                         {/* Right Joystick head */}
                                         <div
                                             onPointerDown={(e) => handleJoyMove(e, 'right')}
                                             onPointerMove={(e) => handleJoyMove(e, 'right')}
                                             onPointerUp={(e) => handleJoyEnd(e, 'right')}
                                             onPointerCancel={(e) => handleJoyEnd(e, 'right')}
-                                            className="w-10 h-10 rounded-full bg-[#1e40af] shadow-[0_4px_15px_rgba(0,0,0,0.5)] cursor-grab active:cursor-grabbing border border-blue-400/50 flex items-center justify-center absolute transition-none touch-none"
+                                            className="w-14 h-14 rounded-full bg-gradient-to-br from-hud-accent/20 to-hud-accent/5 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.8)] cursor-grab active:cursor-grabbing border-2 border-hud-accent/40 flex items-center justify-center absolute transition-none touch-none z-20 group-active:border-hud-accent"
                                             style={{ transform: `translate(${joyRight.x}px, ${joyRight.y}px)` }}>
-                                            <div className="w-4 h-4 rounded-full bg-blue-400"></div>
+                                            <div className="w-4 h-4 rounded-full bg-hud-accent shadow-[0_0_15px_var(--color-hud-accent)]"></div>
                                         </div>
                                     </div>
-                                    <span className="text-[10px] text-white/50 font-bold tracking-widest mt-4">Pan / Tilt</span>
+                                    <span className="text-[9px] text-hud-accent/60 font-black tracking-[0.2em] mt-4 uppercase">Pan / Tilt</span>
                                 </div>
 
                             </div>

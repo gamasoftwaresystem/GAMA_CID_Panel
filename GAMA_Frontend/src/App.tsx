@@ -5,7 +5,7 @@ import DroneMap from "./components/DroneMap";
 import DroneDetailPanel from "./components/DroneDetailPanel";
 import mockDrones from "./mock/drones.json";
 import { Drone } from "./types";
-import { Cloud, Wind, Thermometer, Maximize, AlertOctagon, RefreshCcw, StopCircle, Home, PlaneTakeoff, Wifi, ChevronDown, ChevronUp, Activity } from "lucide-react";
+import { Cloud, Wind, Thermometer, Maximize, AlertOctagon, RefreshCcw, StopCircle, Home, PlaneTakeoff, Wifi, ChevronDown, ChevronUp, Activity, Layers, Radio } from "lucide-react";
 import "./App.css";
 
 function App() {
@@ -13,6 +13,12 @@ function App() {
   const [selectedDroneId, setSelectedDroneId] = useState<string | null>(null);
   const [detailDroneId, setDetailDroneId] = useState<string | null>(null);
   const [activeNavId, setActiveNavId] = useState<string>('map');
+
+  // Sidebar Settings Toggles
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [showNoFlyZones, setShowNoFlyZones] = useState(false);
+  const [showBaseZones, setShowBaseZones] = useState(false);
+  const [showPickupZones, setShowPickupZones] = useState(false);
 
   // New UI States
   const [isAppFullscreen, setIsAppFullscreen] = useState(false);
@@ -24,8 +30,8 @@ function App() {
   // Real-time Weather State
   const [weatherData, setWeatherData] = useState<{ temp: string; condition: string; wind: string } | null>(null);
   // Panel Toggles
-  const [isUavCenterOpen, setIsUavCenterOpen] = useState(true);
-  const [isControlCenterOpen, setIsControlCenterOpen] = useState(true);
+  const [isUavCenterOpen, setIsUavCenterOpen] = useState(false);
+  const [isControlCenterOpen, setIsControlCenterOpen] = useState(false);
 
   // Derived state
   const selectedDrone = drones.find((d) => d.drone_id === selectedDroneId) || drones[0];
@@ -195,6 +201,9 @@ function App() {
           selectedDroneId={selectedDroneId}
           onSelectDrone={setSelectedDroneId}
           mapMode={activeNavId}
+          showNoFlyZones={showNoFlyZones}
+          showBaseZones={showBaseZones}
+          showPickupZones={showPickupZones}
         />
         {/* Subtle Cyan Overlay Blend like in the Mockup */}
         <div className="absolute inset-0 bg-teal-900/10 mix-blend-color-dodge pointer-events-none"></div>
@@ -238,221 +247,258 @@ function App() {
 
         {/* Middle Layer (Sidebar + Target Overlay) */}
         <div className="relative flex-1 flex my-6 w-full">
-          <div className="absolute left-0 top-1/4 pointer-events-auto">
-            <Sidebar activeNav={activeNavId} onNavChange={setActiveNavId} />
+          <div className="absolute left-0 top-1/4 pointer-events-auto z-40 flex items-start">
+            <Sidebar activeNav={activeNavId} onNavChange={setActiveNavId} onSettingsClick={() => setIsSettingsOpen(!isSettingsOpen)} />
+
+            {/* Settings Sliding Panel - Attached to Sidebar */}
+            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isSettingsOpen ? 'w-72 opacity-100 ml-4' : 'w-0 opacity-0 ml-0'}`}>
+              <div className="glass-panel w-72 p-5 flex flex-col space-y-5 shadow-2xl min-w-72">
+                <h2 className="text-sm font-bold text-white tracking-wide border-b border-white/10 pb-3">Harita Ayarları</h2>
+
+                <div className="flex items-center justify-between group cursor-pointer" onClick={() => setShowNoFlyZones(!showNoFlyZones)}>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-hud-text-muted group-hover:text-white transition-colors">Yasaklı Bölgeler</span>
+                  <button className={`w-9 h-5 rounded-full transition-colors relative ${showNoFlyZones ? 'bg-hud-danger' : 'bg-white/10 border border-white/10'}`}>
+                    <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${showNoFlyZones ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between group cursor-pointer" onClick={() => setShowBaseZones(!showBaseZones)}>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-hud-text-muted group-hover:text-white transition-colors">Base Bölgeleri</span>
+                  <button className={`w-9 h-5 rounded-full transition-colors relative ${showBaseZones ? 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.6)]' : 'bg-white/10 border border-white/10'}`}>
+                    <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${showBaseZones ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between group cursor-pointer" onClick={() => setShowPickupZones(!showPickupZones)}>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-hud-text-muted group-hover:text-white transition-colors">Teslim Alma Bölgeleri</span>
+                  <button className={`w-9 h-5 rounded-full transition-colors relative ${showPickupZones ? 'bg-hud-accent shadow-[0_0_10px_rgba(94,234,212,0.6)]' : 'bg-white/10 border border-white/10'}`}>
+                    <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-black transition-transform ${showPickupZones ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
-
-
-          {/* Navigation Overlay (Removed logic since map now handles it) */}
         </div>
 
         {/* Bottom Panels Region */}
-        <div className="flex w-full items-end justify-between space-x-6">
+        <div className="flex w-full items-end justify-center space-x-6 transition-all duration-500 ease-in-out">
 
           {/* UAV Center Panel - Optimized for Fleet Management */}
-          <div className={`glass-panel w-[420px] p-5 flex flex-col pointer-events-auto transition-all duration-300 ${isUavCenterOpen ? 'h-[420px]' : 'h-[64px] overflow-hidden'}`}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex flex-col">
-                <h2 className="text-base font-bold text-white tracking-wide cursor-pointer flex items-center hover:text-hud-accent transition-colors" onClick={() => setIsUavCenterOpen(!isUavCenterOpen)}>
-                  UAV Center
-                  {isUavCenterOpen ? <ChevronDown className="w-4 h-4 ml-2 opacity-50" /> : <ChevronUp className="w-4 h-4 ml-2 opacity-50" />}
-                </h2>
-                {isUavCenterOpen && <span className="text-[9px] text-hud-text-muted uppercase tracking-[0.2em] mt-0.5">Fleet Status: Operational</span>}
-              </div>
+          <div className={`glass-panel flex flex-col pointer-events-auto transition-all duration-[750ms] hud-expo overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] ${isUavCenterOpen ? 'w-[420px] h-[420px] p-5 rounded-3xl scale-100' : 'w-14 h-14 p-0 rounded-full items-center justify-center cursor-pointer hover:bg-white/10 hover:scale-110 active:scale-90 scale-100'}`} onClick={!isUavCenterOpen ? () => setIsUavCenterOpen(true) : undefined}>
+            {isUavCenterOpen ? (
+              <div className="hud-panel-enter h-full flex flex-col delay-150">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex flex-col">
+                    <h2 className="text-base font-bold text-white tracking-wide cursor-pointer flex items-center hover:text-hud-accent transition-colors" onClick={() => setIsUavCenterOpen(!isUavCenterOpen)}>
+                      UAV Center
+                      {isUavCenterOpen ? <ChevronDown className="w-4 h-4 ml-2 opacity-50" /> : <ChevronUp className="w-4 h-4 ml-2 opacity-50" />}
+                    </h2>
+                    {isUavCenterOpen && <span className="text-[9px] text-hud-text-muted uppercase tracking-[0.2em] mt-0.5">Fleet Status: Operational</span>}
+                  </div>
 
-              <div className={`flex bg-black/40 rounded-lg p-0.5 border border-white/5 ${!isUavCenterOpen && 'hidden'}`}>
-                {['Fleet', 'Log'].map(tab => (
-                  <button
-                    key={tab}
-                    onClick={() => setUavTab(tab as any)}
-                    className={`px-4 py-1 text-[10px] uppercase font-bold tracking-widest rounded transition-all ${uavTab === tab ? 'bg-hud-accent text-black' : 'text-hud-text-muted hover:text-white'}`}>
-                    {tab}
-                  </button>
-                ))}
-              </div>
-            </div>
+                  <div className={`flex bg-black/40 rounded-lg p-0.5 border border-white/5 ${!isUavCenterOpen && 'hidden'}`}>
+                    {['Fleet', 'Log'].map(tab => (
+                      <button
+                        key={tab}
+                        onClick={() => setUavTab(tab as any)}
+                        className={`px-4 py-1 text-[10px] uppercase font-bold tracking-widest rounded transition-all ${uavTab === tab ? 'bg-hud-accent text-black' : 'text-hud-text-muted hover:text-white'}`}>
+                        {tab}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-            <div className={`flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-5 ${!isUavCenterOpen && 'hidden'}`}>
-              {uavTab === 'Active' || uavTab === 'Fleet' ? (
-                <>
-                  {/* Grouped by Mission State for better tactical awareness */}
-                  {['PICKUP', 'DELIVERING', 'RETURNING'].map(state => {
-                    const filteredDrones = drones.filter(d => d.status.mission_state === state);
-                    if (filteredDrones.length === 0) return null;
+                <div className={`flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-5 ${!isUavCenterOpen && 'hidden'}`}>
+                  {uavTab === 'Active' || uavTab === 'Fleet' ? (
+                    <>
+                      {/* Grouped by Mission State for better tactical awareness */}
+                      {['PICKUP', 'DELIVERING', 'RETURNING'].map(state => {
+                        const filteredDrones = drones.filter(d => d.status.mission_state === state);
+                        if (filteredDrones.length === 0) return null;
 
-                    return (
-                      <div key={state} className="space-y-3">
-                        {/* Enhanced Sticky Header */}
-                        <div className="sticky top-0 z-20 pt-1">
-                          <div className="bg-hud-bg/80 backdrop-blur-xl border border-white/5 rounded-xl p-2.5 mb-2 flex items-center shadow-2xl">
-                            <div className="w-1.5 h-6 rounded-full mr-3 animate-pulse"
-                              style={{ backgroundColor: state === 'PICKUP' ? '#9ACEEB' : state === 'DELIVERING' ? '#fbbf24' : '#ff0000' }}></div>
-                            <div className="flex flex-col">
-                              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">
-                                {state === 'PICKUP' ? 'PICKUP PHASE' : state === 'DELIVERING' ? 'DELIVERY PHASE' : 'RTL PHASE'}
-                              </span>
-                              <span className="text-[8px] text-hud-text-muted uppercase tracking-widest font-bold">
-                                {filteredDrones.length} Units Active
-                              </span>
+                        return (
+                          <div key={state} className="space-y-3">
+                            {/* Enhanced Sticky Header */}
+                            <div className="sticky top-0 z-20 pt-1">
+                              <div className="bg-hud-bg/80 backdrop-blur-xl border border-white/5 rounded-xl p-2.5 mb-2 flex items-center shadow-2xl">
+                                <div className="w-1.5 h-6 rounded-full mr-3 animate-pulse"
+                                  style={{ backgroundColor: state === 'PICKUP' ? '#9ACEEB' : state === 'DELIVERING' ? '#fbbf24' : '#ff0000' }}></div>
+                                <div className="flex flex-col">
+                                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                                    {state === 'PICKUP' ? 'PICKUP PHASE' : state === 'DELIVERING' ? 'DELIVERY PHASE' : 'RTL PHASE'}
+                                  </span>
+                                  <span className="text-[8px] text-hud-text-muted uppercase tracking-widest font-bold">
+                                    {filteredDrones.length} Units Active
+                                  </span>
+                                </div>
+                                <div className="ml-auto bg-white/5 px-2 py-1 rounded border border-white/5">
+                                  <span className="text-[9px] font-mono text-hud-text-muted">ID_SCAN: OK</span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="ml-auto bg-white/5 px-2 py-1 rounded border border-white/5">
-                              <span className="text-[9px] font-mono text-hud-text-muted">ID_SCAN: OK</span>
+
+                            <div className="space-y-3 px-1">
+                              {filteredDrones.map(drone => (
+                                <DroneCard
+                                  key={drone.drone_id}
+                                  drone={drone}
+                                  selected={selectedDroneId === drone.drone_id}
+                                  onClick={() => setSelectedDroneId(drone.drone_id)}
+                                  onOpenDetails={(e) => {
+                                    e.stopPropagation();
+                                    setDetailDroneId(drone.drone_id);
+                                  }}
+                                />
+                              ))}
                             </div>
                           </div>
+                        );
+                      })}
+                    </>
+                  ) : (
+                    <div className="flex flex-col space-y-3 py-2">
+                      {[
+                        { time: '10:45', event: 'GAMA-01: Delivery sequence initiated', type: 'info' },
+                        { time: '10:42', event: 'GAMA-03: Low battery warning - RTL engaged', type: 'warning' },
+                        { time: '10:38', event: 'HVY-X9: Heavy winds detected at Alt 65m', type: 'warning' },
+                        { time: '10:35', event: 'MED-01: Navigation target reached', type: 'success' },
+                        { time: '10:30', event: 'System: Sat-link established with IST-HUB', type: 'info' },
+                      ].map((log, i) => (
+                        <div key={i} className="flex space-x-3 text-[10px] font-mono border-l border-white/10 pl-3 py-1">
+                          <span className="text-hud-text-muted">{log.time}</span>
+                          <span className={log.type === 'warning' ? 'text-hud-warning' : log.type === 'success' ? 'text-hud-accent' : 'text-white/80'}>{log.event}</span>
                         </div>
-
-                        <div className="space-y-3 px-1">
-                          {filteredDrones.map(drone => (
-                            <DroneCard
-                              key={drone.drone_id}
-                              drone={drone}
-                              selected={selectedDroneId === drone.drone_id}
-                              onClick={() => setSelectedDroneId(drone.drone_id)}
-                              onOpenDetails={(e) => {
-                                e.stopPropagation();
-                                setDetailDroneId(drone.drone_id);
-                              }}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </>
-              ) : (
-                <div className="flex flex-col space-y-3 py-2">
-                  {[
-                    { time: '10:45', event: 'GAMA-01: Delivery sequence initiated', type: 'info' },
-                    { time: '10:42', event: 'GAMA-03: Low battery warning - RTL engaged', type: 'warning' },
-                    { time: '10:38', event: 'HVY-X9: Heavy winds detected at Alt 65m', type: 'warning' },
-                    { time: '10:35', event: 'MED-01: Navigation target reached', type: 'success' },
-                    { time: '10:30', event: 'System: Sat-link established with IST-HUB', type: 'info' },
-                  ].map((log, i) => (
-                    <div key={i} className="flex space-x-3 text-[10px] font-mono border-l border-white/10 pl-3 py-1">
-                      <span className="text-hud-text-muted">{log.time}</span>
-                      <span className={log.type === 'warning' ? 'text-hud-warning' : log.type === 'success' ? 'text-hud-accent' : 'text-white/80'}>{log.event}</span>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <Layers className="w-6 h-6 text-hud-text-muted transition-colors hover:text-white" />
+            )}
           </div>
 
           {/* Tactical Fleet Hub - Mission Control */}
-          <div className={`glass-panel flex-[2] max-w-[850px] p-5 flex flex-col pointer-events-auto relative transition-all duration-300 ${isControlCenterOpen ? 'h-[420px]' : 'h-[64px] overflow-hidden'}`}>
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <div className={`w-3 h-3 rounded-full ${isControlCenterOpen ? 'bg-hud-accent animate-pulse shadow-[0_0_10px_rgba(94,234,212,0.8)]' : 'bg-hud-text-muted'}`}></div>
-                <h2 className="text-base font-black text-white tracking-[0.1em] cursor-pointer uppercase" onClick={() => setIsControlCenterOpen(!isControlCenterOpen)}>
-                  {selectedDrone ? `OPERATIONAL CONTROL: ${selectedDrone.drone_id}` : 'FLEET NETWORK OVERVIEW'}
-                </h2>
-              </div>
-              {isControlCenterOpen && (
-                <div className="flex items-center space-x-4 bg-black/30 px-4 py-1.5 rounded-full border border-white/5">
-                  <span className="text-[9px] font-bold text-hud-text-muted uppercase tracking-widest">Global Status:</span>
-                  <span className="text-[10px] font-black text-hud-accent tracking-widest">NOMINAL</span>
+          <div className={`glass-panel flex flex-col pointer-events-auto relative transition-all duration-[850ms] hud-expo overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] ${isControlCenterOpen ? 'flex-[2] max-w-[850px] h-[420px] p-5 rounded-3xl scale-100' : 'w-14 h-14 p-0 rounded-full items-center justify-center cursor-pointer hover:bg-white/10 hover:scale-110 active:scale-90 scale-100'}`} onClick={!isControlCenterOpen ? () => setIsControlCenterOpen(true) : undefined}>
+            {isControlCenterOpen ? (
+              <div className="hud-panel-enter h-full flex flex-col delay-100">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-3 h-3 rounded-full ${isControlCenterOpen ? 'bg-hud-accent animate-pulse shadow-[0_0_10px_rgba(94,234,212,0.8)]' : 'bg-hud-text-muted'}`}></div>
+                    <h2 className="text-base font-black text-white tracking-[0.1em] cursor-pointer uppercase" onClick={() => setIsControlCenterOpen(!isControlCenterOpen)}>
+                      {selectedDrone ? `OPERATIONAL CONTROL: ${selectedDrone.drone_id}` : 'FLEET NETWORK OVERVIEW'}
+                    </h2>
+                  </div>
+                  {isControlCenterOpen && (
+                    <div className="flex items-center space-x-4 bg-black/30 px-4 py-1.5 rounded-full border border-white/5">
+                      <span className="text-[9px] font-bold text-hud-text-muted uppercase tracking-widest">Global Status:</span>
+                      <span className="text-[10px] font-black text-hud-accent tracking-widest">NOMINAL</span>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            <div className={`flex-1 flex gap-6 ${!isControlCenterOpen && 'hidden'}`}>
-              {/* 1. SECTOR: TACTICAL COMMANDS */}
-              <div className="flex flex-col w-44 space-y-3">
-                <span className="text-[9px] font-black text-hud-text-muted uppercase tracking-widest pl-1">Command Layer</span>
-                <div className="grid grid-cols-2 gap-2 flex-1">
-                  {[
-                    { icon: StopCircle, label: 'HALT', color: 'text-hud-danger', bg: 'hover:bg-hud-danger/10' },
-                    { icon: RefreshCcw, label: 'RE-NAV', color: 'text-hud-warning', bg: 'hover:bg-hud-warning/10' },
-                    { icon: PlaneTakeoff, label: 'LIFTOFF', color: 'text-hud-accent', bg: 'hover:bg-hud-accent/10' },
-                    { icon: Home, label: 'BASE', color: 'text-white', bg: 'hover:bg-white/10' }
-                  ].map(cmd => (
+                <div className={`flex-1 flex gap-6`}>
+                  {/* 1. SECTOR: TACTICAL COMMANDS */}
+                  <div className="flex flex-col w-44 space-y-3">
+                    <span className="text-[9px] font-black text-hud-text-muted uppercase tracking-widest pl-1">Command Layer</span>
+                    <div className="grid grid-cols-2 gap-2 flex-1">
+                      {[
+                        { icon: StopCircle, label: 'HALT', color: 'text-hud-danger', bg: 'hover:bg-hud-danger/10' },
+                        { icon: RefreshCcw, label: 'RE-NAV', color: 'text-hud-warning', bg: 'hover:bg-hud-warning/10' },
+                        { icon: PlaneTakeoff, label: 'LIFTOFF', color: 'text-hud-accent', bg: 'hover:bg-hud-accent/10' },
+                        { icon: Home, label: 'BASE', color: 'text-white', bg: 'hover:bg-white/10' }
+                      ].map(cmd => (
+                        <button
+                          key={cmd.label}
+                          onClick={() => handleCommandClick(cmd.label)}
+                          className={`border rounded-xl p-3 flex flex-col items-center justify-center transition-all group ${activeCommand === cmd.label ? 'bg-white/10 border-white/30 scale-95 shadow-inner' : `bg-black/40 border-white/5 ${cmd.bg}`}`}>
+                          <cmd.icon className={`w-4 h-4 mb-2 transition-colors ${activeCommand === cmd.label ? 'text-white' : cmd.color}`} />
+                          <span className="text-[9px] font-black uppercase tracking-widest text-white/70 group-hover:text-white">{cmd.label}</span>
+                        </button>
+                      ))}
+                    </div>
                     <button
-                      key={cmd.label}
-                      onClick={() => handleCommandClick(cmd.label)}
-                      className={`border rounded-xl p-3 flex flex-col items-center justify-center transition-all group ${activeCommand === cmd.label ? 'bg-white/10 border-white/30 scale-95 shadow-inner' : `bg-black/40 border-white/5 ${cmd.bg}`}`}>
-                      <cmd.icon className={`w-4 h-4 mb-2 transition-colors ${activeCommand === cmd.label ? 'text-white' : cmd.color}`} />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-white/70 group-hover:text-white">{cmd.label}</span>
+                      className="w-full py-2 bg-hud-danger border border-hud-danger/50 text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-hud-danger/80 transition-all shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+                      ABORT ALL MISSIONS
                     </button>
-                  ))}
-                </div>
-                <button
-                  className="w-full py-2 bg-hud-danger border border-hud-danger/50 text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-hud-danger/80 transition-all shadow-[0_0_15px_rgba(239,68,68,0.2)]">
-                  ABORT ALL MISSIONS
-                </button>
-              </div>
-
-              {/* 2. SECTOR: ASSET DISTRIBUTION (Visualizer) */}
-              <div className="flex-1 bg-black/40 rounded-2xl border border-white/5 p-5 flex flex-col relative overflow-hidden">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Asset Distribution</span>
-                    <span className="text-xs text-hud-text-muted font-mono">{drones.length} ACTIVE NODES</span>
                   </div>
-                  <div className="bg-hud-accent/10 px-2 py-0.5 rounded border border-hud-accent/20">
-                    <span className="text-[9px] font-bold text-hud-accent uppercase">Real-Time Sync</span>
-                  </div>
-                </div>
 
-                <div className="flex-1 flex flex-col justify-center space-y-5">
-                  {/* Distribution Bars */}
-                  {[
-                    { label: 'PICKUP', count: drones.filter(d => d.status.mission_state === 'PICKUP').length, color: '#9ACEEB' },
-                    { label: 'DELIVERING', count: drones.filter(d => d.status.mission_state === 'DELIVERING').length, color: '#fbbf24' },
-                    { label: 'RETURNING', count: drones.filter(d => d.status.mission_state === 'RETURNING').length, color: '#ff0000' }
-                  ].map(stat => (
-                    <div key={stat.label} className="space-y-1.5">
-                      <div className="flex justify-between items-end px-1">
-                        <span className="text-[9px] font-bold text-hud-text-muted uppercase tracking-wider">{stat.label}</span>
-                        <span className="text-xs font-mono text-white font-bold">{stat.count} <span className="text-[9px] opacity-30 text-white">UNITS</span></span>
+                  {/* 2. SECTOR: ASSET DISTRIBUTION (Visualizer) */}
+                  <div className="flex-1 bg-black/40 rounded-2xl border border-white/5 p-5 flex flex-col relative overflow-hidden">
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Asset Distribution</span>
+                        <span className="text-xs text-hud-text-muted font-mono">{drones.length} ACTIVE NODES</span>
                       </div>
-                      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full transition-all duration-500 shadow-[0_0_8px_currentColor]"
-                          style={{ width: `${(stat.count / drones.length) * 100}%`, backgroundColor: stat.color, color: stat.color }}></div>
+                      <div className="bg-hud-accent/10 px-2 py-0.5 rounded border border-hud-accent/20">
+                        <span className="text-[9px] font-bold text-hud-accent uppercase">Real-Time Sync</span>
                       </div>
                     </div>
-                  ))}
-                </div>
 
-                {activeCommand && (
-                  <div className="absolute inset-0 bg-hud-accent/5 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center animate-in fade-in duration-300">
-                    <div className="w-12 h-12 rounded-full border-2 border-dashed border-hud-accent animate-spin mb-3"></div>
-                    <span className="text-[10px] font-black text-hud-accent uppercase tracking-[0.3em]">Synching Command...</span>
-                  </div>
-                )}
-              </div>
-
-              {/* 3. SECTOR: SYSTEM VITAL DIAGNOSTICS */}
-              <div className="flex-1 flex flex-col space-y-3">
-                <span className="text-[9px] font-black text-hud-text-muted uppercase tracking-widest pl-1">Diagnostics Board</span>
-                <div className="flex-1 space-y-2">
-                  {[
-                    { label: 'SAT-LINK', value: 'OPTIMAL', icon: Wifi, color: 'text-hud-accent' },
-                    { label: 'AIR DENSITY', value: '1.225 kg/m³', icon: Cloud, color: 'text-white/60' },
-                    { label: 'WIND SHEAR', value: '12.4 km/h', icon: Wind, color: 'text-hud-warning' },
-                    { label: 'FLEET HEALTH', value: 'GOOD', icon: Activity, color: 'text-hud-accent' }
-                  ].map(metric => (
-                    <div key={metric.label} className="bg-black/30 border border-white/5 rounded-xl p-3 flex justify-between items-center hover:bg-white/5 transition-colors">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
-                          <metric.icon className={`w-3.5 h-3.5 ${metric.color}`} />
+                    <div className="flex-1 flex flex-col justify-center space-y-5">
+                      {/* Distribution Bars */}
+                      {[
+                        { label: 'PICKUP', count: drones.filter(d => d.status.mission_state === 'PICKUP').length, color: '#9ACEEB' },
+                        { label: 'DELIVERING', count: drones.filter(d => d.status.mission_state === 'DELIVERING').length, color: '#fbbf24' },
+                        { label: 'RETURNING', count: drones.filter(d => d.status.mission_state === 'RETURNING').length, color: '#ff0000' }
+                      ].map(stat => (
+                        <div key={stat.label} className="space-y-1.5">
+                          <div className="flex justify-between items-end px-1">
+                            <span className="text-[9px] font-bold text-hud-text-muted uppercase tracking-wider">{stat.label}</span>
+                            <span className="text-xs font-mono text-white font-bold">{stat.count} <span className="text-[9px] opacity-30 text-white">UNITS</span></span>
+                          </div>
+                          <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all duration-500 shadow-[0_0_8px_currentColor]"
+                              style={{ width: `${(stat.count / drones.length) * 100}%`, backgroundColor: stat.color, color: stat.color }}></div>
+                          </div>
                         </div>
-                        <span className="text-[9px] font-bold text-hud-text-muted uppercase tracking-widest">{metric.label}</span>
-                      </div>
-                      <span className={`text-[10px] font-black font-mono ${metric.color}`}>{metric.value}</span>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                <div className="bg-gradient-to-r from-hud-warning/20 to-transparent p-3 rounded-xl border border-hud-warning/10 flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <AlertOctagon className="w-3.5 h-3.5 text-hud-warning animate-pulse" />
-                    <span className="text-[9px] font-black text-hud-warning uppercase tracking-widest">Fleet Integrity</span>
+
+                    {activeCommand && (
+                      <div className="absolute inset-0 bg-hud-accent/5 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center animate-in fade-in duration-300">
+                        <div className="w-12 h-12 rounded-full border-2 border-dashed border-hud-accent animate-spin mb-3"></div>
+                        <span className="text-[10px] font-black text-hud-accent uppercase tracking-[0.3em]">Synching Command...</span>
+                      </div>
+                    )}
                   </div>
-                  <span className="text-[10px] font-mono text-white font-bold">94%</span>
+
+                  {/* 3. SECTOR: SYSTEM VITAL DIAGNOSTICS */}
+                  <div className="flex-1 flex flex-col space-y-3">
+                    <span className="text-[9px] font-black text-hud-text-muted uppercase tracking-widest pl-1">Diagnostics Board</span>
+                    <div className="flex-1 space-y-2">
+                      {[
+                        { label: 'SAT-LINK', value: 'OPTIMAL', icon: Wifi, color: 'text-hud-accent' },
+                        { label: 'AIR DENSITY', value: '1.225 kg/m³', icon: Cloud, color: 'text-white/60' },
+                        { label: 'WIND SHEAR', value: '12.4 km/h', icon: Wind, color: 'text-hud-warning' },
+                        { label: 'FLEET HEALTH', value: 'GOOD', icon: Activity, color: 'text-hud-accent' }
+                      ].map(metric => (
+                        <div key={metric.label} className="bg-black/30 border border-white/5 rounded-xl p-3 flex justify-between items-center hover:bg-white/5 transition-colors">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                              <metric.icon className={`w-3.5 h-3.5 ${metric.color}`} />
+                            </div>
+                            <span className="text-[9px] font-bold text-hud-text-muted uppercase tracking-widest">{metric.label}</span>
+                          </div>
+                          <span className={`text-[10px] font-black font-mono ${metric.color}`}>{metric.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="bg-gradient-to-r from-hud-warning/20 to-transparent p-3 rounded-xl border border-hud-warning/10 flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <AlertOctagon className="w-3.5 h-3.5 text-hud-warning animate-pulse" />
+                        <span className="text-[9px] font-black text-hud-warning uppercase tracking-widest">Fleet Integrity</span>
+                      </div>
+                      <span className="text-[10px] font-mono text-white font-bold">94%</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <Radio className="w-6 h-6 text-hud-text-muted transition-colors hover:text-white" />
+            )}
           </div>
 
         </div>
@@ -460,17 +506,19 @@ function App() {
       </div>
 
       {/* Drone Detail Modal Overlay */}
-      {detailDroneId && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-auto">
-          <div className="animate-in fade-in zoom-in duration-200">
-            <DroneDetailPanel
-              drone={drones.find((d) => d.drone_id === detailDroneId)!}
-              onClose={() => setDetailDroneId(null)}
-            />
+      {
+        detailDroneId && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-auto">
+            <div className="animate-in fade-in zoom-in duration-200">
+              <DroneDetailPanel
+                drone={drones.find((d) => d.drone_id === detailDroneId)!}
+                onClose={() => setDetailDroneId(null)}
+              />
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 }
 

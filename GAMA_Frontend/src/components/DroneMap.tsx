@@ -27,9 +27,12 @@ interface DroneMapProps {
     selectedDroneId: string | null;
     onSelectDrone: (id: string) => void;
     mapMode: string;
+    showNoFlyZones?: boolean;
+    showBaseZones?: boolean;
+    showPickupZones?: boolean;
 }
 
-export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMode }: DroneMapProps) {
+export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMode, showNoFlyZones = false, showBaseZones = false, showPickupZones = false }: DroneMapProps) {
     const mapRef = useRef<MapRef>(null);
     const [viewState, setViewState] = useState({
         longitude: 29.000,
@@ -83,6 +86,160 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                 >
                     {/* Dark Tint Overlay applied ONLY here - lightened to 20% */}
                     <div className="absolute inset-0 pointer-events-none bg-[#050a0f]/20 z-10" />
+
+                    {/* Zone Overlays */}
+                    {showNoFlyZones && (
+                        <Source id="no-fly-zones" type="geojson" data={{
+                            type: 'FeatureCollection',
+                            features: [
+                                // Airports (Polygons)
+                                {
+                                    type: 'Feature',
+                                    properties: { type: 'airport' },
+                                    geometry: {
+                                        type: 'Polygon',
+                                        coordinates: [[
+                                            [28.670, 41.330], [28.830, 41.330], [28.830, 41.220], [28.670, 41.220], [28.670, 41.330]
+                                        ]] // Istanbul Airport IST
+                                    }
+                                },
+                                {
+                                    type: 'Feature',
+                                    properties: { type: 'airport' },
+                                    geometry: {
+                                        type: 'Polygon',
+                                        coordinates: [[
+                                            [29.250, 40.940], [29.370, 40.940], [29.370, 40.860], [29.250, 40.860], [29.250, 40.940]
+                                        ]] // Sabiha Gökçen SAW
+                                    }
+                                },
+                                // Historical Peninsula (Polygon)
+                                {
+                                    type: 'Feature',
+                                    properties: { type: 'historic' },
+                                    geometry: {
+                                        type: 'Polygon',
+                                        coordinates: [[
+                                            [28.970, 41.020], [28.995, 41.020], [28.995, 41.000], [28.970, 41.000], [28.970, 41.020]
+                                        ]]
+                                    }
+                                },
+                                // Point Zones (Radius enforced via paint properties - pixels at Zoom 15)
+                                // Military: Hasdal (approx 2.5km radius)
+                                { type: 'Feature', properties: { type: 'military', radius: 1400 }, geometry: { type: 'Point', coordinates: [28.955, 41.095] } },
+                                // Military: Maltepe (approx 3km radius)
+                                { type: 'Feature', properties: { type: 'military', radius: 1700 }, geometry: { type: 'Point', coordinates: [29.155, 40.940] } },
+                                // Prison: Metris (approx 500m radius)
+                                { type: 'Feature', properties: { type: 'prison', radius: 280 }, geometry: { type: 'Point', coordinates: [28.882, 41.077] } },
+                                // Stadium: Tüpraş (Beşiktaş) (approx 200m radius)
+                                { type: 'Feature', properties: { type: 'stadium', radius: 110 }, geometry: { type: 'Point', coordinates: [28.995, 41.039] } },
+                                // Stadium: Rams Park (Galatasaray)
+                                { type: 'Feature', properties: { type: 'stadium', radius: 120 }, geometry: { type: 'Point', coordinates: [28.985, 41.103] } },
+                                // Stadium: Ülker (Fenerbahçe)
+                                { type: 'Feature', properties: { type: 'stadium', radius: 110 }, geometry: { type: 'Point', coordinates: [29.037, 40.987] } },
+                                // Infrastructure: Ambarlı Fuel Depot (approx 1.5km radius)
+                                { type: 'Feature', properties: { type: 'infrastructure', radius: 800 }, geometry: { type: 'Point', coordinates: [28.685, 40.965] } },
+                            ]
+                        }}>
+                            {/* Render Polygons */}
+                            <Layer id="no-fly-poly-glow" type="line" filter={['==', ['geometry-type'], 'Polygon']} paint={{ 'line-color': '#ef4444', 'line-width': 10, 'line-blur': 10, 'line-opacity': 0.6 }} />
+                            <Layer id="no-fly-poly-fill" type="fill" filter={['==', ['geometry-type'], 'Polygon']} paint={{ 'fill-color': '#ef4444', 'fill-opacity': 0.1 }} />
+                            <Layer id="no-fly-poly-outline" type="line" filter={['==', ['geometry-type'], 'Polygon']} paint={{ 'line-color': '#ff6b6b', 'line-width': 2, 'line-dasharray': [3, 3] }} />
+
+                            {/* Render Points as Circles */}
+                            <Layer
+                                id="no-fly-point-glow"
+                                type="circle"
+                                filter={['==', ['geometry-type'], 'Point']}
+                                paint={{
+                                    'circle-radius': [
+                                        'interpolate',
+                                        ['exponential', 2],
+                                        ['zoom'],
+                                        10, ['*', ['+', ['get', 'radius'], 5], 0.03125],
+                                        15, ['+', ['get', 'radius'], 5]
+                                    ],
+                                    'circle-blur': 1,
+                                    'circle-color': '#ef4444',
+                                    'circle-opacity': 0.5
+                                }}
+                            />
+                            <Layer
+                                id="no-fly-point-fill"
+                                type="circle"
+                                filter={['==', ['geometry-type'], 'Point']}
+                                paint={{
+                                    'circle-radius': [
+                                        'interpolate',
+                                        ['exponential', 2],
+                                        ['zoom'],
+                                        10, ['*', ['get', 'radius'], 0.03125],
+                                        15, ['get', 'radius']
+                                    ],
+                                    'circle-color': '#ef4444',
+                                    'circle-opacity': 0.15,
+                                    'circle-stroke-width': 2,
+                                    'circle-stroke-color': '#ff6b6b'
+                                }}
+                            />
+                        </Source>
+                    )}
+
+                    {showBaseZones && (
+                        <Source id="base-zones" type="geojson" data={{
+                            type: 'FeatureCollection',
+                            features: [
+                                // Maslak Base
+                                { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [29.015, 41.105] } },
+                                // Kadıköy Base
+                                { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [29.030, 40.990] } }
+                            ]
+                        }}>
+                            <Layer id="base-glow" type="circle" paint={{
+                                'circle-radius': ['interpolate', ['exponential', 2], ['zoom'], 10, 4.6, 15, 150],
+                                'circle-blur': 1.5, 'circle-color': '#3b82f6', 'circle-opacity': 0.4
+                            }} />
+                            <Layer id="base-outer" type="circle" paint={{
+                                'circle-radius': ['interpolate', ['exponential', 2], ['zoom'], 10, 3.1, 15, 100],
+                                'circle-color': 'transparent', 'circle-stroke-width': 2, 'circle-stroke-color': '#60a5fa'
+                            }} />
+                            <Layer id="base-fill" type="circle" paint={{
+                                'circle-radius': ['interpolate', ['exponential', 2], ['zoom'], 10, 3.1, 15, 100],
+                                'circle-color': '#3b82f6', 'circle-opacity': 0.1
+                            }} />
+                            <Layer id="base-core" type="circle" paint={{
+                                'circle-radius': ['interpolate', ['exponential', 2], ['zoom'], 10, 0.6, 15, 6],
+                                'circle-color': '#93c5fd', 'circle-stroke-width': 2, 'circle-stroke-color': '#ffffff'
+                            }} />
+                        </Source>
+                    )}
+
+                    {showPickupZones && (
+                        <Source id="pickup-zones" type="geojson" data={{
+                            type: 'FeatureCollection',
+                            features: [
+                                // Beşiktaş
+                                { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [29.006, 41.042] } },
+                                // Üsküdar
+                                { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [29.015, 41.026] } },
+                                // Şişli
+                                { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [28.987, 41.060] } }
+                            ]
+                        }}>
+                            <Layer id="pickup-glow" type="circle" paint={{
+                                'circle-radius': ['interpolate', ['exponential', 2], ['zoom'], 10, 2.8, 15, 90],
+                                'circle-blur': 1.5, 'circle-color': '#10b981', 'circle-opacity': 0.3
+                            }} />
+                            <Layer id="pickup-outer" type="circle" paint={{
+                                'circle-radius': ['interpolate', ['exponential', 2], ['zoom'], 10, 1.8, 15, 60],
+                                'circle-color': '#10b981', 'circle-opacity': 0.15, 'circle-stroke-width': 1.5, 'circle-stroke-color': '#34d399'
+                            }} />
+                            <Layer id="pickup-core" type="circle" paint={{
+                                'circle-radius': ['interpolate', ['exponential', 2], ['zoom'], 10, 0.4, 15, 4],
+                                'circle-color': '#ffffff', 'circle-stroke-width': 2, 'circle-stroke-color': '#059669'
+                            }} />
+                        </Source>
+                    )}
 
                     {/* 3D Buildings Extrusion Layer */}
                     {viewState.zoom > 14 && (
