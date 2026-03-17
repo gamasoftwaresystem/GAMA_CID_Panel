@@ -41,6 +41,7 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
         pitch: 0,
         bearing: 0
     });
+    const [hoveredZone, setHoveredZone] = useState<{ name: string; x: number; y: number } | null>(null);
 
     useEffect(() => {
         if (!mapRef.current) return;
@@ -73,6 +74,23 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                     mapStyle="mapbox://styles/mapbox/navigation-night-v1"
                     mapboxAccessToken={MAPBOX_TOKEN}
                     attributionControl={false}
+                    onMouseMove={e => {
+                        const features = e.target.queryRenderedFeatures(e.point, {
+                            layers: ['no-fly-poly-fill', 'no-fly-point-fill']
+                        });
+
+                        if (features.length > 0) {
+                            const feature = features[0];
+                            setHoveredZone({
+                                name: feature.properties?.name || 'Yasaklı Bölge',
+                                x: e.point.x,
+                                y: e.point.y
+                            });
+                        } else {
+                            setHoveredZone(null);
+                        }
+                    }}
+                    onMouseLeave={() => setHoveredZone(null)}
                     onLoad={evt => {
                         const map = evt.target as any;
                         try {
@@ -95,7 +113,7 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                                 // Airports (Polygons)
                                 {
                                     type: 'Feature',
-                                    properties: { type: 'airport' },
+                                    properties: { type: 'airport', name: 'İstanbul Havalimanı (IST)' },
                                     geometry: {
                                         type: 'Polygon',
                                         coordinates: [[
@@ -105,7 +123,7 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                                 },
                                 {
                                     type: 'Feature',
-                                    properties: { type: 'airport' },
+                                    properties: { type: 'airport', name: 'Sabiha Gökçen Havalimanı (SAW)' },
                                     geometry: {
                                         type: 'Polygon',
                                         coordinates: [[
@@ -116,7 +134,7 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                                 // Historical Peninsula (Polygon)
                                 {
                                     type: 'Feature',
-                                    properties: { type: 'historic' },
+                                    properties: { type: 'historic', name: 'Tarihi Yarımada' },
                                     geometry: {
                                         type: 'Polygon',
                                         coordinates: [[
@@ -126,19 +144,19 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                                 },
                                 // Point Zones (Radius enforced via paint properties - pixels at Zoom 15)
                                 // Military: Hasdal (approx 2.5km radius)
-                                { type: 'Feature', properties: { type: 'military', radius: 1400 }, geometry: { type: 'Point', coordinates: [28.955, 41.095] } },
+                                { type: 'Feature', properties: { type: 'military', radius: 1400, name: 'Hasdal Askeri Bölge' }, geometry: { type: 'Point', coordinates: [28.955, 41.095] } },
                                 // Military: Maltepe (approx 3km radius)
-                                { type: 'Feature', properties: { type: 'military', radius: 1700 }, geometry: { type: 'Point', coordinates: [29.155, 40.940] } },
+                                { type: 'Feature', properties: { type: 'military', radius: 1700, name: 'Maltepe Askeri Bölge' }, geometry: { type: 'Point', coordinates: [29.155, 40.940] } },
                                 // Prison: Metris (approx 500m radius)
-                                { type: 'Feature', properties: { type: 'prison', radius: 280 }, geometry: { type: 'Point', coordinates: [28.882, 41.077] } },
+                                { type: 'Feature', properties: { type: 'prison', radius: 280, name: 'Metris Cezaevi' }, geometry: { type: 'Point', coordinates: [28.882, 41.077] } },
                                 // Stadium: Tüpraş (Beşiktaş) (approx 200m radius)
-                                { type: 'Feature', properties: { type: 'stadium', radius: 110 }, geometry: { type: 'Point', coordinates: [28.995, 41.039] } },
+                                { type: 'Feature', properties: { type: 'stadium', radius: 110, name: 'Tüpraş Stadyumu' }, geometry: { type: 'Point', coordinates: [28.995, 41.039] } },
                                 // Stadium: Rams Park (Galatasaray)
-                                { type: 'Feature', properties: { type: 'stadium', radius: 120 }, geometry: { type: 'Point', coordinates: [28.985, 41.103] } },
+                                { type: 'Feature', properties: { type: 'stadium', radius: 120, name: 'Rams Park Stadyumu' }, geometry: { type: 'Point', coordinates: [28.985, 41.103] } },
                                 // Stadium: Ülker (Fenerbahçe)
-                                { type: 'Feature', properties: { type: 'stadium', radius: 110 }, geometry: { type: 'Point', coordinates: [29.037, 40.987] } },
+                                { type: 'Feature', properties: { type: 'stadium', radius: 110, name: 'Ülker Stadyumu' }, geometry: { type: 'Point', coordinates: [29.037, 40.987] } },
                                 // Infrastructure: Ambarlı Fuel Depot (approx 1.5km radius)
-                                { type: 'Feature', properties: { type: 'infrastructure', radius: 800 }, geometry: { type: 'Point', coordinates: [28.685, 40.965] } },
+                                { type: 'Feature', properties: { type: 'infrastructure', radius: 800, name: 'Ambarlı Akaryakıt Tesisleri' }, geometry: { type: 'Point', coordinates: [28.685, 40.965] } },
                             ]
                         }}>
                             {/* Render Polygons */}
@@ -334,6 +352,19 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                     )}
                 </Map>
             </div>
+
+            {/* Hover Tooltip for No-Fly Zones */}
+            {hoveredZone && (
+                <div
+                    className="fixed pointer-events-none z-[100] px-2 py-1 bg-black/60 backdrop-blur-md border border-white/20 rounded text-[9px] font-black uppercase tracking-widest text-hud-danger shadow-2xl animate-in fade-in zoom-in duration-150"
+                    style={{
+                        left: hoveredZone.x + 15,
+                        top: hoveredZone.y + 15
+                    }}
+                >
+                    {hoveredZone.name}
+                </div>
+            )}
 
             {/* OVERLAY UI MARKERS (Always bright, outside the filtered div if possible, 
                 but react-map-gl markers are tied to the Map. 
