@@ -12,6 +12,18 @@ interface DroneCardProps {
 export default function DroneCard({ drone, onClick, onOpenDetails, selected }: DroneCardProps) {
     const isWarning = drone.status.health !== 'GOOD' || drone.status.battery_pct < 20;
 
+    const getProgressText = () => {
+        if (drone.status.mission_state === 'PICKUP') return 'Is Taking Delivery';
+        if (drone.status.mission_state === 'DELIVERING') return 'Out for Delivery';
+        if (drone.status.mission_state === 'RETURNING') {
+            if (drone.status.health === 'CRITICAL') return 'Damaged';
+            if (drone.status.health === 'WARNING') return 'Adverse Cond.';
+            if (drone.status.battery_pct <= 20) return 'Low Battery';
+            return 'Pending Base';
+        }
+        return 'Pending';
+    };
+
     return (
         <div
             onClick={onClick}
@@ -39,7 +51,10 @@ export default function DroneCard({ drone, onClick, onOpenDetails, selected }: D
                             }}>
                         </span>
                         <p className="text-[10px] text-hud-text-muted capitalize">
-                            {drone.status.mission_state?.toLowerCase() || drone.status.mode}
+                            {drone.status.mission_state === 'PICKUP' ? 'Pending' :
+                                drone.status.mission_state === 'DELIVERING' ? 'In Service' :
+                                    drone.status.mission_state === 'RETURNING' ? 'Out of Service' :
+                                        drone.status.mode?.toLowerCase() || 'Unknown'}
                         </p>
                     </div>
                 </div>
@@ -66,9 +81,8 @@ export default function DroneCard({ drone, onClick, onOpenDetails, selected }: D
                     </div>
 
                     <div className="flex items-center space-x-1.5">
-                        <span className="text-[9px] font-bold text-white/50 uppercase tracking-widest">
-                            {drone.status.mission_state === 'PICKUP' ? 'En Route' :
-                                drone.status.mission_state === 'DELIVERING' ? 'Delivering' : 'Returning'}
+                        <span className="text-[9px] font-bold text-white/50 uppercase tracking-widest truncate max-w-[90px]">
+                            {getProgressText()}
                         </span>
                         <span className="text-[9px] text-hud-accent font-black font-mono">
                             {((drone.fleet_mission?.progress || 0) * 100).toFixed(0)}%

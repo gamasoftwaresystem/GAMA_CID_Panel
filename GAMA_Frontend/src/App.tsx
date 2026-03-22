@@ -5,7 +5,7 @@ import DroneMap from "./components/DroneMap";
 import DroneDetailPanel from "./components/DroneDetailPanel";
 import mockDrones from "./mock/drones.json";
 import { Drone } from "./types";
-import { Cloud, Wind, Thermometer, Maximize, RefreshCcw, StopCircle, Home, PlaneTakeoff, Wifi, ChevronDown, Activity, Layers, Radio } from "lucide-react";
+import { Cloud, Wind, Thermometer, Maximize, RefreshCcw, StopCircle, Home, PlaneTakeoff, Wifi, Activity, Layers, Radio } from "lucide-react";
 import "./App.css";
 
 function App() {
@@ -13,6 +13,20 @@ function App() {
   const [selectedDroneId, setSelectedDroneId] = useState<string | null>(null);
   const [detailDroneId, setDetailDroneId] = useState<string | null>(null);
   const [activeNavId, setActiveNavId] = useState<string>('map');
+  const [previousNavId, setPreviousNavId] = useState<string>('map');
+
+  const handleDroneSelect = (id: string) => {
+    if (selectedDroneId === id) {
+      setSelectedDroneId(null);
+      setActiveNavId(previousNavId);
+    } else {
+      setSelectedDroneId(id);
+      if (activeNavId !== 'nav') {
+        setPreviousNavId(activeNavId);
+        setActiveNavId('nav');
+      }
+    }
+  };
 
   // Sidebar Settings Toggles
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -199,10 +213,7 @@ function App() {
         <DroneMap
           drones={drones}
           selectedDroneId={selectedDroneId}
-          onSelectDrone={(id) => {
-            setSelectedDroneId(id);
-            if (activeNavId === 'map') setActiveNavId('nav');
-          }}
+          onSelectDrone={handleDroneSelect}
           mapMode={activeNavId}
           showNoFlyZones={showNoFlyZones}
           showBaseZones={showBaseZones}
@@ -296,9 +307,7 @@ function App() {
                     <div className="flex flex-col">
                       <h2 className="text-base font-bold text-white tracking-wide flex items-center">
                         UAV Center
-                        <ChevronDown className="w-4 h-4 ml-2 opacity-50 cursor-pointer" onClick={() => setIsUavCenterOpen(false)} />
                       </h2>
-                      <span className="text-[9px] text-hud-text-muted uppercase tracking-[0.2em] mt-0.5">Fleet Status: Operational</span>
                     </div>
 
                     <div className="flex bg-black/40 rounded-lg p-0.5 border border-white/5">
@@ -329,7 +338,7 @@ function App() {
                                     style={{ backgroundColor: state === 'PICKUP' ? '#9ACEEB' : state === 'DELIVERING' ? '#fbbf24' : '#ff0000' }}></div>
                                   <div className="flex flex-col">
                                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">
-                                      {state === 'PICKUP' ? 'PICKUP PHASE' : state === 'DELIVERING' ? 'DELIVERY PHASE' : 'RTL PHASE'}
+                                      {state === 'PICKUP' ? 'PENDING' : state === 'DELIVERING' ? 'IN SERVICE' : 'OUT OF SERVICE'}
                                     </span>
                                     <span className="text-[8px] text-hud-text-muted uppercase tracking-widest font-bold">
                                       {filteredDrones.length} Units Active
@@ -344,7 +353,7 @@ function App() {
                                     key={drone.drone_id}
                                     drone={drone}
                                     selected={selectedDroneId === drone.drone_id}
-                                    onClick={() => setSelectedDroneId(drone.drone_id)}
+                                    onClick={() => handleDroneSelect(drone.drone_id)}
                                     onOpenDetails={(e) => {
                                       e.stopPropagation();
                                       setDetailDroneId(drone.drone_id);
@@ -384,7 +393,7 @@ function App() {
                     <div className="flex items-center space-x-3">
                       <div className="w-3 h-3 rounded-full bg-hud-accent animate-pulse shadow-[0_0_10px_rgba(94,234,212,0.8)]"></div>
                       <h2 className="text-base font-black text-white tracking-[0.1em] uppercase">
-                        {selectedDrone ? `OPERATIONAL CONTROL: ${selectedDrone.drone_id}` : 'FLEET NETWORK OVERVIEW'}
+                        {selectedDrone ? `GENERAL GUIDE: ${selectedDrone.drone_id}` : 'FLEET NETWORK OVERVIEW'}
                       </h2>
                     </div>
                     <div className="flex items-center space-x-4 bg-black/30 px-4 py-1.5 rounded-full border border-white/5">
@@ -423,9 +432,9 @@ function App() {
                       </div>
                       <div className="flex-1 flex flex-col justify-center space-y-5">
                         {[
-                          { label: 'PICKUP', count: drones.filter(d => d.status.mission_state === 'PICKUP').length, color: '#9ACEEB' },
-                          { label: 'DELIVERING', count: drones.filter(d => d.status.mission_state === 'DELIVERING').length, color: '#fbbf24' },
-                          { label: 'RETURNING', count: drones.filter(d => d.status.mission_state === 'RETURNING').length, color: '#ff0000' }
+                          { label: 'PENDING', count: drones.filter(d => d.status.mission_state === 'PICKUP').length, color: '#9ACEEB' },
+                          { label: 'IN SERVICE', count: drones.filter(d => d.status.mission_state === 'DELIVERING').length, color: '#fbbf24' },
+                          { label: 'OUT OF SERVICE', count: drones.filter(d => d.status.mission_state === 'RETURNING').length, color: '#ff0000' }
                         ].map(stat => (
                           <div key={stat.label} className="space-y-1.5">
                             <div className="flex justify-between items-end px-1">
@@ -466,21 +475,27 @@ function App() {
           {/* MacOS Dock */}
           <div className="mac-dock">
             <div
-              className={`mac-dock-item ${isUavCenterOpen ? 'active' : ''}`}
+              className={`mac-dock-item group ${isUavCenterOpen ? 'active' : ''}`}
               onClick={() => setIsUavCenterOpen(!isUavCenterOpen)}
-              title="UAV Center"
             >
               <Layers className="w-5 h-5" />
               <div className="active-dot" />
+              {/* Tooltip */}
+              <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-black/50 backdrop-blur-sm text-white/90 text-[9px] font-medium tracking-wider px-2.5 py-1 rounded-md pointer-events-none whitespace-nowrap border border-white/5 shadow-lg translate-y-1 group-hover:translate-y-0 z-50 flex items-center justify-center">
+                UAV Center
+              </div>
             </div>
 
             <div
-              className={`mac-dock-item ${isControlCenterOpen ? 'active' : ''}`}
+              className={`mac-dock-item group ${isControlCenterOpen ? 'active' : ''}`}
               onClick={() => setIsControlCenterOpen(!isControlCenterOpen)}
-              title="Tactical Hub"
             >
               <Radio className="w-5 h-5" />
               <div className="active-dot" />
+              {/* Tooltip */}
+              <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-black/50 backdrop-blur-sm text-white/90 text-[9px] font-medium tracking-wider px-2.5 py-1 rounded-md pointer-events-none whitespace-nowrap border border-white/5 shadow-lg translate-y-1 group-hover:translate-y-0 z-50 flex items-center justify-center">
+                Sky View
+              </div>
             </div>
           </div>
         </div>

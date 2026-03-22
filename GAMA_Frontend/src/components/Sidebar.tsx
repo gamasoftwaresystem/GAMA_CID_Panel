@@ -8,7 +8,7 @@ interface SidebarProps {
 
 export default function Sidebar({ activeNav, onNavChange, onSettingsClick }: SidebarProps) {
     const menuItems = [
-        { id: 'map', icon: Map, label: 'Tactical View' },
+        { id: 'map', icon: Map, label: 'Sky View' },
         { id: 'nav', icon: Navigation2, label: 'Navigation' },
         { id: 'focus', icon: Crosshair, label: 'Tracking' },
     ];
