@@ -48,7 +48,7 @@ function App() {
   const [isControlCenterOpen, setIsControlCenterOpen] = useState(false);
 
   // Derived state
-  const selectedDrone = drones.find((d) => d.drone_id === selectedDroneId) || drones[0];
+  const selectedDrone = drones.find((d) => d.drone_id === selectedDroneId);
 
   // Toggle Browser Fullscreen
   const toggleAppFullscreen = () => {
@@ -262,7 +262,7 @@ function App() {
         {/* Middle Layer (Sidebar + Target Overlay) */}
         <div className="relative flex-1 flex my-6 w-full">
           <div className="absolute left-0 top-1/4 pointer-events-auto z-40 flex items-start">
-            <Sidebar activeNav={activeNavId} onNavChange={setActiveNavId} onSettingsClick={() => setIsSettingsOpen(!isSettingsOpen)} />
+            <Sidebar activeNav={activeNavId} onNavChange={setActiveNavId} onSettingsClick={() => setIsSettingsOpen(!isSettingsOpen)} isSettingsActive={isSettingsOpen} />
 
             {/* Settings Sliding Panel - Attached to Sidebar */}
             <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isSettingsOpen ? 'w-72 opacity-100 ml-4' : 'w-0 opacity-0 ml-0'}`}>
@@ -286,7 +286,7 @@ function App() {
                 <div className="flex items-center justify-between group cursor-pointer" onClick={() => setShowPickupZones(!showPickupZones)}>
                   <span className="text-[10px] font-black uppercase tracking-widest text-hud-text-muted group-hover:text-white transition-colors">Teslim Alma Bölgeleri</span>
                   <button className={`w-9 h-5 rounded-full transition-colors relative ${showPickupZones ? 'bg-hud-accent shadow-[0_0_10px_rgba(94,234,212,0.6)]' : 'bg-white/10 border border-white/10'}`}>
-                    <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-black transition-transform ${showPickupZones ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                    <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${showPickupZones ? 'translate-x-4' : 'translate-x-0'}`}></div>
                   </button>
                 </div>
               </div>
@@ -341,7 +341,7 @@ function App() {
                                       {state === 'PICKUP' ? 'PENDING' : state === 'DELIVERING' ? 'IN SERVICE' : 'OUT OF SERVICE'}
                                     </span>
                                     <span className="text-[8px] text-hud-text-muted uppercase tracking-widest font-bold">
-                                      {filteredDrones.length} Units Active
+                                      {filteredDrones.length} Units
                                     </span>
                                   </div>
                                 </div>
@@ -393,7 +393,7 @@ function App() {
                     <div className="flex items-center space-x-3">
                       <div className="w-3 h-3 rounded-full bg-hud-accent animate-pulse shadow-[0_0_10px_rgba(94,234,212,0.8)]"></div>
                       <h2 className="text-base font-black text-white tracking-[0.1em] uppercase">
-                        {selectedDrone ? `GENERAL GUIDE: ${selectedDrone.drone_id}` : 'FLEET NETWORK OVERVIEW'}
+                        {selectedDrone ? `GENERAL GUIDE: ${selectedDrone.drone_id}` : 'GENERAL INFORMATION'}
                       </h2>
                     </div>
                     <div className="flex items-center space-x-4 bg-black/30 px-4 py-1.5 rounded-full border border-white/5">
@@ -424,44 +424,86 @@ function App() {
                     </div>
 
                     <div className="flex-1 bg-black/40 rounded-2xl border border-white/5 p-5 flex flex-col relative overflow-hidden">
-                      <div className="flex justify-between items-start mb-6">
-                        <div className="flex flex-col">
-                          <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Asset Distribution</span>
-                          <span className="text-xs text-hud-text-muted font-mono">{drones.length} ACTIVE NODES</span>
-                        </div>
-                      </div>
-                      <div className="flex-1 flex flex-col justify-center space-y-5">
-                        {[
-                          { label: 'PENDING', count: drones.filter(d => d.status.mission_state === 'PICKUP').length, color: '#9ACEEB' },
-                          { label: 'IN SERVICE', count: drones.filter(d => d.status.mission_state === 'DELIVERING').length, color: '#fbbf24' },
-                          { label: 'OUT OF SERVICE', count: drones.filter(d => d.status.mission_state === 'RETURNING').length, color: '#ff0000' }
-                        ].map(stat => (
-                          <div key={stat.label} className="space-y-1.5">
-                            <div className="flex justify-between items-end px-1">
-                              <span className="text-[9px] font-bold text-hud-text-muted uppercase tracking-wider">{stat.label}</span>
-                              <span className="text-xs font-mono text-white font-bold">{stat.count}</span>
-                            </div>
-                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                              <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(stat.count / (drones.length || 1)) * 100}%`, backgroundColor: stat.color }}></div>
+                      {selectedDrone ? (
+                        <>
+                          <div className="flex justify-between items-start mb-6">
+                            <div className="flex flex-col">
+                              <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Drone Telemetry</span>
+                              <span className="text-xs text-hud-accent font-mono">{selectedDrone.drone_id} ACTIVE</span>
                             </div>
                           </div>
-                        ))}
-                      </div>
+                          <div className="flex-1 flex flex-col justify-center space-y-5">
+                            {[
+                              { label: 'BATTERY', value: selectedDrone.status.battery_pct, color: '#5eead4' },
+                              { label: 'ALTITUDE', value: (selectedDrone.navigation.alt_relative / 120) * 100, color: '#fbbf24', display: `${selectedDrone.navigation.alt_relative.toFixed(1)}m` },
+                              { label: 'SPEED', value: (selectedDrone.navigation.ground_speed / 80) * 100, color: '#9ACEEB', display: `${selectedDrone.navigation.ground_speed.toFixed(1)}km/h` }
+                            ].map(stat => (
+                              <div key={stat.label} className="space-y-1.5">
+                                <div className="flex justify-between items-end px-1">
+                                  <span className="text-[9px] font-bold text-hud-text-muted uppercase tracking-wider">{stat.label}</span>
+                                  <span className="text-xs font-mono text-white font-bold">{stat.display || `${stat.value.toFixed(0)}%`}</span>
+                                </div>
+                                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(stat.value, 100)}%`, backgroundColor: stat.color }}></div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex justify-between items-start mb-6">
+                            <div className="flex flex-col">
+                              <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Asset Distribution</span>
+                              <span className="text-xs text-hud-text-muted font-mono">{drones.length} NODES</span>
+                            </div>
+                          </div>
+                          <div className="flex-1 flex flex-col justify-center space-y-5">
+                            {[
+                              { label: 'PENDING', count: drones.filter(d => d.status.mission_state === 'PICKUP').length, color: '#9ACEEB' },
+                              { label: 'IN SERVICE', count: drones.filter(d => d.status.mission_state === 'DELIVERING').length, color: '#fbbf24' },
+                              { label: 'OUT OF SERVICE', count: drones.filter(d => d.status.mission_state === 'RETURNING').length, color: '#ff0000' }
+                            ].map(stat => (
+                              <div key={stat.label} className="space-y-1.5">
+                                <div className="flex justify-between items-end px-1">
+                                  <span className="text-[9px] font-bold text-hud-text-muted uppercase tracking-wider">{stat.label}</span>
+                                  <span className="text-xs font-mono text-white font-bold">{stat.count}</span>
+                                </div>
+                                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(stat.count / (drones.length || 1)) * 100}%`, backgroundColor: stat.color }}></div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="flex-1 flex flex-col space-y-3">
-                      <span className="text-[9px] font-black text-hud-text-muted uppercase tracking-widest pl-1">Diagnostics Board</span>
-                      <div className="flex-1 space-y-2">
-                        {[
-                          { label: 'SAT-LINK', value: 'OPTIMAL', icon: Wifi, color: 'text-hud-accent' },
-                          { label: 'FLEET HEALTH', value: 'GOOD', icon: Activity, color: 'text-hud-accent' }
-                        ].map(metric => (
-                          <div key={metric.label} className="bg-black/30 border border-white/5 rounded-xl p-3 flex justify-between items-center">
-                            <div className="flex items-center space-x-3">
-                              <metric.icon className={`w-3.5 h-3.5 ${metric.color}`} />
-                              <span className="text-[9px] font-bold text-hud-text-muted uppercase tracking-widest">{metric.label}</span>
+                      <span className="text-[9px] font-black text-hud-text-muted uppercase tracking-widest pl-1">
+                        {selectedDrone ? 'Drone Operating Guide' : 'System Briefing'}
+                      </span>
+                      <div className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-1 max-h-[220px]">
+                        {(selectedDrone ? [
+                          { title: "OPERATIONAL LIMITS", desc: "Altitude: 120m AGL / Speed: 80km/h.", status: "OK", icon: Activity },
+                          { title: "CRITICAL RTL", desc: "Return to Launch triggers at 15% Battery.", status: "ACTIVE", icon: Radio },
+                          { title: "AI TELEMETRY", desc: "Live Edge detection YOLOv11 enabled.", status: "STABLE", icon: Layers },
+                          { title: "LINK PROTOCOL", desc: "Secure AES-256 Mesh encrypted.", status: "SYNCED", icon: Wifi },
+                        ] : [
+                          { title: "DATA FLOW", desc: "Hybrid (Edge-Backend-Panel) active.", status: "NOMINAL", icon: Activity },
+                          { title: "CONNECTIVITY", desc: "4.8GHz / 5G Mesh link operational.", status: "SECURE", icon: Radio },
+                          { title: "WEATHER ADVISORY", desc: "All Hub coordinates within safe limits.", status: "SAFE", icon: Cloud },
+                          { title: "SAFETY LOCK", desc: "Geofence violation protocols on standby.", status: "VERIFIED", icon: Home },
+                        ]).map((item, idx) => (
+                          <div key={idx} className="bg-black/20 border border-white/5 rounded-xl p-3 flex flex-col space-y-1 hover:bg-white/[0.03] transition-colors group">
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-center space-x-2">
+                                <item.icon className="w-3 h-3 text-hud-accent/60 group-hover:text-hud-accent transition-colors" />
+                                <span className="text-[9px] font-black text-white/50 group-hover:text-white/80 transition-colors uppercase tracking-wider">{item.title}</span>
+                              </div>
+                              <span className="text-[8px] font-black text-hud-accent/40 bg-hud-accent/5 px-1.5 py-0.5 rounded uppercase">{item.status}</span>
                             </div>
-                            <span className={`text-[10px] font-black font-mono ${metric.color}`}>{metric.value}</span>
+                            <p className="text-[10px] text-hud-text-muted font-medium leading-relaxed pl-5 decoration-hud-accent/20 group-hover:text-hud-text transition-colors">{item.desc}</p>
                           </div>
                         ))}
                       </div>
@@ -494,9 +536,20 @@ function App() {
               <div className="active-dot" />
               {/* Tooltip */}
               <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-black/50 backdrop-blur-sm text-white/90 text-[9px] font-medium tracking-wider px-2.5 py-1 rounded-md pointer-events-none whitespace-nowrap border border-white/5 shadow-lg translate-y-1 group-hover:translate-y-0 z-50 flex items-center justify-center">
-                Sky View
+                Tactical Hub
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Minimalist Branding Overlay (To cover Mapbox) */}
+        <div className="absolute bottom-[2px] left-[0px] pointer-events-auto z-50">
+          <div className="bg-black/40 backdrop-blur-xl h-[40px] px-4 flex items-center space-x-3 rounded-r-xl border border-white/10 shadow-2xl">
+            <img src="/gama_logo.png" alt="GAMA" className="w-8 h-8 object-contain mix-blend-screen brightness-125" />
+            <span className="text-[14px] font-black text-white uppercase tracking-tight flex items-center gap-2">
+              <span>GAMA</span>
+              <span className="opacity-80">DRONES</span>
+            </span>
           </div>
         </div>
 
