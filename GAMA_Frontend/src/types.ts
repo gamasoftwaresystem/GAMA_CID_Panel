@@ -19,6 +19,8 @@ export interface DroneNavigation {
     alt_relative: number;
     ground_speed: number;
     heading: number;
+    pitch?: number;
+    roll?: number;
 }
 
 export interface DroneAIAnalytics {

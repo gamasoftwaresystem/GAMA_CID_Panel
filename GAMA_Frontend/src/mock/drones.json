@@ -15,7 +15,9 @@
             "lon": 28.985,
             "alt_relative": 12.5,
             "ground_speed": 4.2,
-            "heading": 90
+            "heading": 90,
+            "pitch": 5,
+            "roll": -3
         },
         "ai_analytics": {
             "detections": [
@@ -77,7 +79,9 @@
             "lon": 29.01,
             "alt_relative": 45,
             "ground_speed": 12.5,
-            "heading": 180
+            "heading": 180,
+            "pitch": -2,
+            "roll": 12
         },
         "ai_analytics": {
             "detections": [],
@@ -124,7 +128,9 @@
             "lon": 29.006,
             "alt_relative": 80,
             "ground_speed": 15,
-            "heading": 270
+            "heading": 270,
+            "pitch": 15,
+            "roll": -8
         },
         "ai_analytics": {
             "detections": [],
@@ -171,7 +177,9 @@
             "lon": 28.995,
             "alt_relative": 120,
             "ground_speed": 18,
-            "heading": 45
+            "heading": 45,
+            "pitch": 8,
+            "roll": 15
         },
         "ai_analytics": {
             "detections": [],
@@ -218,7 +226,9 @@
             "lon": 29.025,
             "alt_relative": 150,
             "ground_speed": 22.5,
-            "heading": 0
+            "heading": 0,
+            "pitch": 2,
+            "roll": -2
         },
         "ai_analytics": {
             "detections": [],
@@ -265,7 +275,9 @@
             "lon": 29.015,
             "alt_relative": 65,
             "ground_speed": 8,
-            "heading": 220
+            "heading": 220,
+            "pitch": -5,
+            "roll": -10
         },
         "sensors": {
             "lidar_min_dist": 12,

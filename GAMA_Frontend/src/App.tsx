@@ -402,8 +402,9 @@ function App() {
                     </div>
                   </div>
 
-                  <div className="flex-1 flex gap-6">
-                    <div className="flex flex-col w-44 space-y-3">
+                  <div className="flex-1 flex gap-6 min-h-0">
+                    {!selectedDrone && (
+                      <div className="flex flex-col w-44 space-y-3">
                       <span className="text-[9px] font-black text-hud-text-muted uppercase tracking-widest pl-1">Command Layer</span>
                       <div className="grid grid-cols-2 gap-2 flex-1">
                         {[
@@ -421,37 +422,182 @@ function App() {
                           </button>
                         ))}
                       </div>
-                    </div>
+                      </div>
+                    )}
 
-                    <div className="flex-1 bg-black/40 rounded-2xl border border-white/5 p-5 flex flex-col relative overflow-hidden">
-                      {selectedDrone ? (
-                        <>
-                          <div className="flex justify-between items-start mb-6">
-                            <div className="flex flex-col">
-                              <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Drone Telemetry</span>
-                              <span className="text-xs text-hud-accent font-mono">{selectedDrone.drone_id} ACTIVE</span>
+                    {selectedDrone ? (
+                      <div className="flex-1 flex flex-col bg-black/40 rounded-3xl border border-white/5 p-6 relative overflow-hidden">
+                        {/* Background Aesthetics */}
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(94,234,212,0.03),transparent_70%)] pointer-events-none" />
+                        
+                        {/* Top: Branding & Primary Stats */}
+                        <div className="flex justify-between items-start mb-4 z-10 border-b border-white/5 pb-4">
+                          <div className="flex items-center space-x-6">
+                            <div className="relative">
+                              <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shadow-2xl">
+                                <img src="/gama_logo.png" className="w-10 h-10 object-contain brightness-200 mix-blend-screen opacity-70" />
+                              </div>
+                              <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-hud-accent border-4 border-[#050a0f] shadow-[0_0_10px_rgba(94,234,212,0.4)]" />
+                            </div>
+                            <div className="flex flex-col space-y-1">
+                              <span className="text-lg font-black text-white tracking-widest leading-none">
+                                {selectedDrone.drone_id}
+                              </span>
+                              <div className="flex items-center space-x-3">
+                                <span className="px-2 py-0.5 rounded bg-hud-accent/10 text-hud-accent text-[8px] font-black tracking-widest uppercase">
+                                  {selectedDrone.status.mode}
+                                </span>
+                                <span className="text-[10px] font-bold text-white/30 uppercase tracking-tighter">System Locked & Armed</span>
+                              </div>
                             </div>
                           </div>
-                          <div className="flex-1 flex flex-col justify-center space-y-5">
-                            {[
-                              { label: 'BATTERY', value: selectedDrone.status.battery_pct, color: '#5eead4' },
-                              { label: 'ALTITUDE', value: (selectedDrone.navigation.alt_relative / 120) * 100, color: '#fbbf24', display: `${selectedDrone.navigation.alt_relative.toFixed(1)}m` },
-                              { label: 'SPEED', value: (selectedDrone.navigation.ground_speed / 80) * 100, color: '#9ACEEB', display: `${selectedDrone.navigation.ground_speed.toFixed(1)}km/h` }
-                            ].map(stat => (
-                              <div key={stat.label} className="space-y-1.5">
-                                <div className="flex justify-between items-end px-1">
-                                  <span className="text-[9px] font-bold text-hud-text-muted uppercase tracking-wider">{stat.label}</span>
-                                  <span className="text-xs font-mono text-white font-bold">{stat.display || `${stat.value.toFixed(0)}%`}</span>
-                                </div>
-                                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(stat.value, 100)}%`, backgroundColor: stat.color }}></div>
+
+                          <div className="flex space-x-10 items-center bg-black/30 px-6 py-3 rounded-2xl border border-white/5">
+                            <div className="flex flex-col items-end">
+                              <span className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Flight Duration</span>
+                              <span className="text-xl font-black text-white font-mono tabular-nums leading-none tracking-tighter">32:56</span>
+                            </div>
+                            <div className="h-10 w-px bg-white/10" />
+                            <div className="flex flex-col items-end">
+                              <span className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Core Power</span>
+                              <div className="flex items-baseline space-x-3">
+                                <span className="text-xl font-black text-white font-mono tabular-nums leading-none tracking-tighter">{selectedDrone.status.battery_pct.toFixed(0)}%</span>
+                                <div className="w-10 h-3 rounded-sm border border-white/10 p-0.5 relative overflow-hidden bg-white/5">
+                                   <div className="h-full bg-hud-accent opacity-80 shadow-[0_0_10px_rgba(94,234,212,0.3)]" style={{ width: `${selectedDrone.status.battery_pct}%` }} />
                                 </div>
                               </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Middle: Gauges Dash */}
+                        <div className="flex-1 grid grid-cols-3 gap-12 items-center z-10 pt-2 pb-8">
+                          {/* Altitude */}
+                          <div className="flex flex-col items-center mb-6">
+                            <span className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-4">Vertical Altitude</span>
+                            <div className="flex items-center space-x-6">
+                               <div className="relative h-40 w-3.5 bg-white/5 rounded-full border border-white/10 p-0.5 flex items-end overflow-hidden">
+                                  <div 
+                                    className="w-full bg-gradient-to-t from-hud-accent to-hud-accent/40 rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(94,234,212,0.4)]"
+                                    style={{ height: `${Math.min((selectedDrone.navigation.alt_relative / 120) * 100, 100)}%` }}
+                                  />
+                               </div>
+                               <div className="flex flex-col">
+                                  <div className="flex items-baseline space-x-1">
+                                    <span className="text-4xl font-black text-white font-mono leading-none tracking-tighter tabular-nums">
+                                      {selectedDrone.navigation.alt_relative.toFixed(0)}
+                                    </span>
+                                    <span className="text-sm font-bold text-white/20">m</span>
+                                  </div>
+                                  <div className="flex items-center space-x-2 mt-4 px-3 py-1.5 rounded-lg bg-hud-accent/10 border border-hud-accent/20">
+                                     <span className="text-xs font-black text-hud-accent font-mono">+2.00</span>
+                                     <span className="text-[8px] font-black text-hud-accent/60 uppercase">m/s VSI</span>
+                                  </div>
+                               </div>
+                            </div>
+                          </div>
+
+                          {/* Horizon */}
+                          <div className="flex flex-col items-center justify-center mb-6">
+                            <div className="relative group">
+                              <div className="absolute -inset-6 rounded-full border border-white/[0.03] animate-pulse" />
+                              <div className="w-32 h-32 rounded-full border-4 border-white/5 relative overflow-hidden bg-black/60 shadow-2xl">
+                                <div 
+                                  className="absolute inset-0 transition-transform duration-700 origin-center scale-150"
+                                  style={{ transform: `rotate(${(selectedDrone.navigation.roll || 0)}deg) translateY(${-(selectedDrone.navigation.pitch || 0) * 4}px)` }}
+                                >
+                                  <div className="h-full w-full bg-[#2563eb]/20" />
+                                  <div className="h-full w-full bg-[#166534]/40 border-t-2 border-white/40" />
+                                  
+                                  {/* Pitch markings */}
+                                  <div className="absolute inset-x-0 top-0 h-full flex flex-col items-center justify-center space-y-12">
+                                     {[20, 10, 0, -10, -20].map(val => (
+                                       <div key={val} className="flex flex-col items-center opacity-30">
+                                          <div className={`h-px bg-white ${val === 0 ? 'w-24 bg-white/60' : val % 20 === 0 ? 'w-16' : 'w-8'}`} />
+                                          {val !== 0 && <span className="text-[8px] text-white mt-1 tabular-nums font-mono">{val}</span>}
+                                       </div>
+                                     ))}
+                                  </div>
+                                </div>
+
+                                {/* Fixed center instrument */}
+                                <div className="absolute inset-0 flex items-center justify-center p-6 z-20 pointer-events-none">
+                                   <div className="w-full h-0.5 bg-hud-danger opacity-50 shadow-[0_0_12px_rgba(239,68,68,0.5)]" />
+                                   <div className="absolute w-3 h-3 rounded-full bg-hud-danger shadow-xl border border-white/20" />
+                                   <div className="absolute inset-x-12 flex justify-between">
+                                      <div className="w-8 h-3 border-l-4 border-t-4 border-hud-danger/80" />
+                                      <div className="w-8 h-3 border-r-4 border-t-4 border-hud-danger/80" />
+                                   </div>
+                                   <div className="absolute top-4 inset-x-0 flex justify-center space-x-6 opacity-40">
+                                      {[-30, -15, 0, 15, 30].map(deg => (
+                                        <div key={deg} className={`w-0.5 h-3 bg-white ${deg === 0 ? 'bg-hud-accent h-5 w-1.5 opacity-80' : ''}`} />
+                                      ))}
+                                   </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Speed */}
+                          <div className="flex flex-col items-center mb-6">
+                            <span className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-2">Ground Speed</span>
+                            <div className="relative w-32 h-32 flex items-center justify-center">
+                               <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                                 <circle cx="50" cy="50" r="42" className="fill-none stroke-white/[0.03] stroke-[6]" />
+                                 <circle cx="50" cy="50" r="42" 
+                                         className="fill-none stroke-hud-accent stroke-[6] transition-all duration-1000 opacity-60" 
+                                         strokeDasharray={`${(selectedDrone.navigation.ground_speed / 80) * 264} 264`}
+                                         strokeLinecap="round" />
+                               </svg>
+                               <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                  <div className="flex items-baseline space-x-1">
+                                    <span className="text-3xl font-black text-white font-mono leading-none tracking-tighter tabular-nums">
+                                      {selectedDrone.navigation.ground_speed.toFixed(1)}
+                                    </span>
+                                    <span className="text-[10px] font-bold text-white/20">m/s</span>
+                                  </div>
+                               </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Bottom: Mission Stats & Actions */}
+                        <div className="mt-4 pt-6 border-t border-white/5 flex justify-between items-center z-10">
+                          <div className="flex space-x-10">
+                            <div className="flex flex-col">
+                               <div className="flex items-center space-x-2 mb-1">
+                                 <Wifi className="w-4 h-4 text-hud-accent" />
+                                 <span className="text-[10px] font-black text-white/80 uppercase tracking-widest leading-none">C2 LINK ACTIVE</span>
+                               </div>
+                               <span className="text-[8px] font-black text-white/30 uppercase pl-6 tracking-tighter">SECURE MESH CONNECTION</span>
+                            </div>
+                            <div className="flex flex-col">
+                               <div className="flex items-center space-x-2 mb-1">
+                                 <Activity className="w-4 h-4 text-hud-accent/60" />
+                                 <span className="text-[10px] font-black text-white/80 uppercase tracking-widest leading-none">12 GNSS LOCK</span>
+                               </div>
+                               <span className="text-[8px] font-black text-white/30 uppercase pl-6 tracking-tighter">HDOP 1.18 | VDOP 0.92</span>
+                            </div>
+                          </div>
+
+                          <div className="flex space-x-3">
+                            {[
+                               { icon: RefreshCcw, label: 'RTL', color: 'hud-warning' },
+                               { icon: StopCircle, label: 'PAUSE', color: 'hud-danger' },
+                               { icon: Maximize, label: 'WP', color: 'hud-accent' }
+                            ].map(action => (
+                              <button key={action.label} className="w-16 h-12 rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center justify-center hover:bg-white/10 hover:border-hud-accent/30 transition-all group overflow-hidden relative">
+                                <div className="absolute inset-0 bg-hud-accent/0 group-hover:bg-hud-accent/5 transition-colors" />
+                                <action.icon className="w-5 h-5 text-white/40 group-hover:text-hud-accent transition-colors relative z-10" />
+                                <span className="text-[8px] font-black text-white/30 mt-1 uppercase tracking-widest group-hover:text-white transition-colors relative z-10">{action.label}</span>
+                              </button>
                             ))}
                           </div>
-                        </>
-                      ) : (
-                        <>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex-1 bg-black/40 rounded-2xl border border-white/5 p-5 flex flex-col relative overflow-hidden">
                           <div className="flex justify-between items-start mb-6">
                             <div className="flex flex-col">
                               <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Asset Distribution</span>
@@ -475,39 +621,34 @@ function App() {
                               </div>
                             ))}
                           </div>
-                        </>
-                      )}
-                    </div>
+                        </div>
 
-                    <div className="flex-1 flex flex-col space-y-3">
-                      <span className="text-[9px] font-black text-hud-text-muted uppercase tracking-widest pl-1">
-                        {selectedDrone ? 'Drone Operating Guide' : 'System Briefing'}
-                      </span>
-                      <div className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-1 max-h-[220px]">
-                        {(selectedDrone ? [
-                          { title: "OPERATIONAL LIMITS", desc: "Altitude: 120m AGL / Speed: 80km/h.", status: "OK", icon: Activity },
-                          { title: "CRITICAL RTL", desc: "Return to Launch triggers at 15% Battery.", status: "ACTIVE", icon: Radio },
-                          { title: "AI TELEMETRY", desc: "Live Edge detection YOLOv11 enabled.", status: "STABLE", icon: Layers },
-                          { title: "LINK PROTOCOL", desc: "Secure AES-256 Mesh encrypted.", status: "SYNCED", icon: Wifi },
-                        ] : [
-                          { title: "DATA FLOW", desc: "Hybrid (Edge-Backend-Panel) active.", status: "NOMINAL", icon: Activity },
-                          { title: "CONNECTIVITY", desc: "4.8GHz / 5G Mesh link operational.", status: "SECURE", icon: Radio },
-                          { title: "WEATHER ADVISORY", desc: "All Hub coordinates within safe limits.", status: "SAFE", icon: Cloud },
-                          { title: "SAFETY LOCK", desc: "Geofence violation protocols on standby.", status: "VERIFIED", icon: Home },
-                        ]).map((item, idx) => (
-                          <div key={idx} className="bg-black/20 border border-white/5 rounded-xl p-3 flex flex-col space-y-1 hover:bg-white/[0.03] transition-colors group">
-                            <div className="flex justify-between items-center">
-                              <div className="flex items-center space-x-2">
-                                <item.icon className="w-3 h-3 text-hud-accent/60 group-hover:text-hud-accent transition-colors" />
-                                <span className="text-[9px] font-black text-white/50 group-hover:text-white/80 transition-colors uppercase tracking-wider">{item.title}</span>
+                        <div className="flex-1 flex flex-col space-y-3">
+                          <span className="text-[9px] font-black text-hud-text-muted uppercase tracking-widest pl-1">
+                            System Briefing
+                          </span>
+                          <div className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-1 max-h-[220px]">
+                            {[
+                              { title: "DATA FLOW", desc: "Hybrid (Edge-Backend-Panel) active.", status: "NOMINAL", icon: Activity },
+                              { title: "CONNECTIVITY", desc: "4.8GHz / 5G Mesh link operational.", status: "SECURE", icon: Radio },
+                              { title: "WEATHER ADVISORY", desc: "All Hub coordinates within safe limits.", status: "SAFE", icon: Cloud },
+                              { title: "SAFETY LOCK", desc: "Geofence violation protocols on standby.", status: "VERIFIED", icon: Home },
+                            ].map((item, idx) => (
+                              <div key={idx} className="bg-black/20 border border-white/5 rounded-xl p-3 flex flex-col space-y-1 hover:bg-white/[0.03] transition-colors group">
+                                <div className="flex justify-between items-center">
+                                  <div className="flex items-center space-x-2">
+                                    <item.icon className="w-3 h-3 text-hud-accent/60 group-hover:text-hud-accent transition-colors" />
+                                    <span className="text-[9px] font-black text-white/50 group-hover:text-white/80 transition-colors uppercase tracking-wider">{item.title}</span>
+                                  </div>
+                                  <span className="text-[8px] font-black text-hud-accent/40 bg-hud-accent/5 px-1.5 py-0.5 rounded uppercase">{item.status}</span>
+                                </div>
+                                <p className="text-[10px] text-hud-text-muted font-medium leading-relaxed pl-5 decoration-hud-accent/20 group-hover:text-hud-text transition-colors">{item.desc}</p>
                               </div>
-                              <span className="text-[8px] font-black text-hud-accent/40 bg-hud-accent/5 px-1.5 py-0.5 rounded uppercase">{item.status}</span>
-                            </div>
-                            <p className="text-[10px] text-hud-text-muted font-medium leading-relaxed pl-5 decoration-hud-accent/20 group-hover:text-hud-text transition-colors">{item.desc}</p>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

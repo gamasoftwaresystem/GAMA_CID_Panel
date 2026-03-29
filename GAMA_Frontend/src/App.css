@@ -191,3 +191,21 @@
   align-items: flex-end;
   justify-content: center;
 }
+
+/* HUD Specifics */
+.hud-vbar-glow {
+  box-shadow: 0 0 15px var(--color-hud-accent);
+}
+
+.hud-gauge-outline {
+  stroke: rgba(255, 255, 255, 0.05);
+  stroke-width: 4;
+}
+
+.hud-value-glow {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.hud-horizon-bg {
+  background: linear-gradient(to bottom, rgba(37, 99, 235, 0.2) 0%, rgba(37, 99, 235, 0.1) 50%, rgba(22, 101, 52, 0.2) 50%, rgba(22, 101, 52, 0.3) 100%);
+}
