@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Battery, Wifi, Info, X, Activity } from 'lucide-react';
 import { Drone } from '../types';
 
@@ -7,10 +6,18 @@ interface DroneCardProps {
     onClick: () => void;
     onOpenTechnicalHub: (e: React.MouseEvent) => void;
     selected?: boolean;
+    isExpanded?: boolean;
+    onToggleExpand: () => void;
 }
 
-export default function DroneCard({ drone, onClick, onOpenTechnicalHub, selected }: DroneCardProps) {
-    const [showInfo, setShowInfo] = useState(false);
+export default function DroneCard({ 
+    drone, 
+    onClick, 
+    onOpenTechnicalHub, 
+    selected,
+    isExpanded,
+    onToggleExpand
+}: DroneCardProps) {
     const batteryPct = drone.status.battery_pct;
 
     // Mock tech specs base on ID
@@ -52,14 +59,14 @@ export default function DroneCard({ drone, onClick, onOpenTechnicalHub, selected
                     ? 'bg-white/10 border-white/20 shadow-lg scale-[1.02]'
                     : 'bg-black/40 border-white/5 hover:bg-black/50 hover:border-white/10'
                 }
-        ${showInfo ? 'p-3' : 'p-2.5'}
+        ${isExpanded ? 'p-3' : 'p-2.5'}
       `}
         >
             {/* Top Row: Main Content */}
             <div className="flex items-center gap-3 w-full">
                 {/* Vertical Battery Bar */}
                 <div
-                    className={`w-1 transition-all duration-500 shrink-0 ${getBatteryClass()} ${showInfo ? 'h-10' : 'h-7'}`}
+                    className={`w-1 transition-all duration-500 shrink-0 ${getBatteryClass()} ${isExpanded ? 'h-10' : 'h-7'}`}
                     style={{ backgroundColor: getBatteryColor() }}
                 />
 
@@ -72,7 +79,7 @@ export default function DroneCard({ drone, onClick, onOpenTechnicalHub, selected
                         <p className="text-[8px] text-hud-text-muted uppercase font-bold tracking-widest truncate">
                             {getStatusText()}
                         </p>
-                        {!showInfo && (
+                        {!isExpanded && (
                             <div className="flex items-center gap-1.5 opacity-30">
                                 <div className="flex items-center gap-0.5">
                                     <Wifi className="w-2 h-2" />
@@ -89,16 +96,16 @@ export default function DroneCard({ drone, onClick, onOpenTechnicalHub, selected
 
                 {/* Info Toggle Button */}
                 <button
-                    className={`w-6 h-6 rounded-md flex items-center justify-center transition-all ${showInfo ? 'bg-hud-accent/20 text-hud-accent shadow-[0_0_10px_rgba(94,234,212,0.2)]' : 'bg-white/5 text-hud-text-muted hover:text-white'}`}
-                    onClick={(e) => { e.stopPropagation(); setShowInfo(!showInfo); }}
+                    className={`w-6 h-6 rounded-md flex items-center justify-center transition-all ${isExpanded ? 'bg-hud-accent/20 text-hud-accent shadow-[0_0_10px_rgba(94,234,212,0.2)]' : 'bg-white/5 text-hud-text-muted hover:text-white'}`}
+                    onClick={(e) => { e.stopPropagation(); onToggleExpand(); }}
                 >
-                    {showInfo ? <X className="w-3 h-3" /> : <Info className="w-3.5 h-3.5" />}
+                    {isExpanded ? <X className="w-3 h-3" /> : <Info className="w-3.5 h-3.5" />}
                 </button>
             </div>
 
             {/* Expanded Content: Technical Specs */}
             <div 
-                className={`overflow-hidden transition-all duration-500 ease-in-out ${showInfo ? 'max-h-56 opacity-100 mt-3 pt-3 border-t border-white/5' : 'max-h-0 opacity-0 pointer-events-none'}`}
+                className={`overflow-hidden transition-all duration-500 ease-in-out ${isExpanded ? 'max-h-56 opacity-100 mt-3 pt-3 border-t border-white/5' : 'max-h-0 opacity-0 pointer-events-none'}`}
             >
                 <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                     <div className="flex flex-col">

@@ -32,7 +32,7 @@ export default function Sidebar({ activeNav, onNavChange, onSettingsClick, isSet
                 </button>
                 {/* Tooltip for Toggle */}
                 <div className="absolute left-14 bg-black/90 text-white text-[9px] font-black tracking-[0.2em] uppercase px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-x-1.5 group-hover:translate-x-0 pointer-events-none whitespace-nowrap border border-white/10 z-50 shadow-2xl">
-                    Map Menu
+                    Map's Menu
                 </div>
             </div>
 

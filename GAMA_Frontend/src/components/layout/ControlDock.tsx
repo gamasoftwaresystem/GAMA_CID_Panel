@@ -23,7 +23,7 @@ export const ControlDock: React.FC<ControlDockProps> = ({
                 <Layers className="w-5 h-5" />
                 <div className="active-dot" />
                 <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-black/50 backdrop-blur-sm text-white/90 text-[9px] font-medium tracking-wider px-2.5 py-1 rounded-md pointer-events-none whitespace-nowrap border border-white/5 shadow-lg translate-y-1 group-hover:translate-y-0 z-50 flex items-center justify-center">
-                    UAV Center
+                    UAV Hub
                 </div>
             </div>
 

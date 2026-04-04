@@ -22,7 +22,7 @@ Proje, temelde **Modern Web Teknolojilerinin** bir araya getirilip, donanım hı
 ### **React.js 19**
 *   **Kullanım Yeri:** Web tabanlı arayüzün her noktası, özellikle `src/App.tsx` ve `/src/components/` klasöründeki tüm modüller.
 *   **Görevleri:** 
-    *   "UAV Center", "Control Panel", "DroneMap" gibi bağımsız parçaların (Component) DOM üzerine çizilmesi ve birbirinden haberdar bir şekilde çalışması.
+    *   "UAV Hub", "Control Panel", "DroneMap" gibi bağımsız parçaların (Component) DOM üzerine çizilmesi ve birbirinden haberdar bir şekilde çalışması.
     *   `useState` ve `useEffect` hook'ları sayesinde sistem verisi (örneğin seçili dron, harita modu veya gelen hava durumu) değiştiği anda sadece ilgili ekran alanını anında yeniden çizmek (Re-render).
 
 ### **TypeScript**

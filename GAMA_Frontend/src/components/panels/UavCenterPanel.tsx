@@ -6,8 +6,10 @@ interface UavCenterPanelProps {
     isOpen: boolean;
     drones: Drone[];
     selectedDroneId: string | null;
-    handleDroneSelect: (id: string) => void;
+    handleDroneSelect: (id: string | null) => void;
     setIsControlCenterOpen: (val: boolean) => void;
+    expandedCardId: string | null;
+    setExpandedCardId: (id: string | null) => void;
 }
 
 export const UavCenterPanel: React.FC<UavCenterPanelProps> = ({
@@ -15,7 +17,9 @@ export const UavCenterPanel: React.FC<UavCenterPanelProps> = ({
     drones,
     selectedDroneId,
     handleDroneSelect,
-    setIsControlCenterOpen
+    setIsControlCenterOpen,
+    expandedCardId,
+    setExpandedCardId
 }) => {
     if (!isOpen) return null;
 
@@ -26,7 +30,7 @@ export const UavCenterPanel: React.FC<UavCenterPanelProps> = ({
                     <div className="flex items-center space-x-3">
                         <div className="w-2.5 h-2.5 rounded-full bg-hud-accent animate-pulse shadow-[0_0_8px_rgba(94,234,212,0.6)]"></div>
                         <h2 className="text-[13px] font-black text-white tracking-[0.1em] uppercase">
-                            UAV Center
+                            UAV Hub
                         </h2>
                     </div>
                 </div>
@@ -38,6 +42,8 @@ export const UavCenterPanel: React.FC<UavCenterPanelProps> = ({
                                 key={drone.drone_id}
                                 drone={drone}
                                 selected={selectedDroneId === drone.drone_id}
+                                isExpanded={expandedCardId === drone.drone_id}
+                                onToggleExpand={() => setExpandedCardId(expandedCardId === drone.drone_id ? null : drone.drone_id)}
                                 onClick={() => handleDroneSelect(drone.drone_id)}
                                 onOpenTechnicalHub={(e) => {
                                     e.stopPropagation();

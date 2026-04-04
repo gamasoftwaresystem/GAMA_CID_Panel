@@ -35,22 +35,25 @@ function App() {
   const [isUavCenterOpen, setIsUavCenterOpen] = useState(false);
   const [isControlCenterOpen, setIsControlCenterOpen] = useState(false);
   const [activeCommand, setActiveCommand] = useState<string | null>(null);
+  const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
 
   // Derived State
   const selectedDrone = drones.find((d) => d.drone_id === selectedDroneId);
 
   // Handlers
-  const handleDroneSelect = (id: string) => {
+  const handleDroneSelect = (id: string | null) => {
     if (selectedDroneId === id) {
       setSelectedDroneId(null);
       setActiveNavId(previousNavId);
     } else {
       setSelectedDroneId(id);
-      if (activeNavId !== 'nav') {
+      if (id && activeNavId !== 'nav') {
         setPreviousNavId(activeNavId);
         setActiveNavId('nav');
       }
     }
+    // Auto-close any expanded info when switching drones
+    setExpandedCardId(null);
   };
 
   const onCommandClick = (cmd: string) => {
@@ -60,7 +63,13 @@ function App() {
   };
 
   return (
-    <div className="w-screen h-screen overflow-hidden text-hud-text relative bg-hud-bg">
+    <div 
+      className="w-screen h-screen overflow-hidden text-hud-text relative bg-hud-bg"
+      onClick={() => {
+        setSelectedDroneId(null);
+        setExpandedCardId(null);
+      }}
+    >
       {/* Background Layer: Map */}
       <div className="absolute inset-0 z-0">
         <DroneMap
@@ -81,8 +90,8 @@ function App() {
         <DashboardHeader weatherData={weatherData} />
 
         {/* Mid-level Navigation & Settings */}
-        <div className="relative flex-1 flex my-6 w-full">
-          <div className="absolute left-0 top-1/4 pointer-events-auto z-40 flex items-start">
+        <div className="relative flex-1 flex my-6 w-full pointer-events-none">
+          <div className="absolute left-0 top-1/4 pointer-events-auto z-40 flex items-start" onClick={(e) => e.stopPropagation()}>
             <Sidebar 
               activeNav={activeNavId} 
               onNavChange={setActiveNavId} 
@@ -103,7 +112,7 @@ function App() {
         </div>
 
         {/* Interaction Layer: Panels & Dock */}
-        <div className="mac-dock-container">
+        <div className="mac-dock-container" onClick={(e) => e.stopPropagation()}>
           <div className="floating-panel-container">
             <UavCenterPanel 
               isOpen={isUavCenterOpen}
@@ -111,6 +120,8 @@ function App() {
               selectedDroneId={selectedDroneId}
               handleDroneSelect={handleDroneSelect}
               setIsControlCenterOpen={setIsControlCenterOpen}
+              expandedCardId={expandedCardId}
+              setExpandedCardId={setExpandedCardId}
             />
 
             <TacticalHubPanel 
