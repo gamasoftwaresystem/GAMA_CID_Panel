@@ -29,10 +29,10 @@ interface DroneMapProps {
     mapMode: string;
     showNoFlyZones?: boolean;
     showBaseZones?: boolean;
-    showPickupZones?: boolean;
+    showHumanDensity?: boolean;
 }
 
-export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMode, showNoFlyZones = false, showBaseZones = false, showPickupZones = false }: DroneMapProps) {
+export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMode, showNoFlyZones = false, showBaseZones = false, showHumanDensity = false }: DroneMapProps) {
     const mapRef = useRef<MapRef>(null);
     const [viewState, setViewState] = useState({
         longitude: 29.000,
@@ -42,6 +42,29 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
         bearing: 0
     });
     const [hoveredZone, setHoveredZone] = useState<{ name: string; x: number; y: number } | null>(null);
+
+    // Mock Human Density Data Points (Istanbul Hotspots)
+    const humanDensityData = {
+        type: 'FeatureCollection',
+        features: [
+            // Beşiktaş
+            { type: 'Feature', properties: { intensity: 0.9 }, geometry: { type: 'Point', coordinates: [29.006, 41.042] } },
+            { type: 'Feature', properties: { intensity: 0.8 }, geometry: { type: 'Point', coordinates: [29.008, 41.044] } },
+            // Taksim / İstiklal
+            { type: 'Feature', properties: { intensity: 0.95 }, geometry: { type: 'Point', coordinates: [28.983, 41.037] } },
+            { type: 'Feature', properties: { intensity: 0.7 }, geometry: { type: 'Point', coordinates: [28.980, 41.034] } },
+            // Kadıköy
+            { type: 'Feature', properties: { intensity: 0.85 }, geometry: { type: 'Point', coordinates: [29.025, 40.992] } },
+            { type: 'Feature', properties: { intensity: 0.6 }, geometry: { type: 'Point', coordinates: [29.028, 40.995] } },
+            // Üsküdar
+            { type: 'Feature', properties: { intensity: 0.75 }, geometry: { type: 'Point', coordinates: [29.015, 41.026] } },
+            // Mecidiyeköy / Zincirlikuyu
+            { type: 'Feature', properties: { intensity: 0.9 }, geometry: { type: 'Point', coordinates: [29.005, 41.065] } },
+            { type: 'Feature', properties: { intensity: 0.8 }, geometry: { type: 'Point', coordinates: [29.003, 41.068] } },
+            // Nişantaşı
+            { type: 'Feature', properties: { intensity: 0.8 }, geometry: { type: 'Point', coordinates: [28.994, 41.051] } },
+        ]
+    };
 
     useEffect(() => {
         if (!mapRef.current) return;
@@ -232,30 +255,37 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                         </Source>
                     )}
 
-                    {showPickupZones && (
-                        <Source id="pickup-zones" type="geojson" data={{
-                            type: 'FeatureCollection',
-                            features: [
-                                // Beşiktaş
-                                { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [29.006, 41.042] } },
-                                // Üsküdar
-                                { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [29.015, 41.026] } },
-                                // Şişli
-                                { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [28.987, 41.060] } }
-                            ]
-                        }}>
-                            <Layer id="pickup-glow" type="circle" paint={{
-                                'circle-radius': ['interpolate', ['exponential', 2], ['zoom'], 10, 2.8, 15, 90],
-                                'circle-blur': 1.5, 'circle-color': '#10b981', 'circle-opacity': 0.3
-                            }} />
-                            <Layer id="pickup-outer" type="circle" paint={{
-                                'circle-radius': ['interpolate', ['exponential', 2], ['zoom'], 10, 1.8, 15, 60],
-                                'circle-color': '#10b981', 'circle-opacity': 0.15, 'circle-stroke-width': 1.5, 'circle-stroke-color': '#34d399'
-                            }} />
-                            <Layer id="pickup-core" type="circle" paint={{
-                                'circle-radius': ['interpolate', ['exponential', 2], ['zoom'], 10, 0.4, 15, 4],
-                                'circle-color': '#ffffff', 'circle-stroke-width': 2, 'circle-stroke-color': '#059669'
-                            }} />
+                    {showHumanDensity && (
+                        <Source id="human-density" type="geojson" data={humanDensityData as any}>
+                            <Layer
+                                id="human-density-heat"
+                                type="heatmap"
+                                paint={{
+                                    // Increase the heatmap weight based on intensity property
+                                    'heatmap-weight': ['get', 'intensity'],
+                                    // Increase the heatmap color weight weight by zoom level
+                                    // heatmap-intensity is a multiplier on top of heatmap-weight
+                                    'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 15, 3],
+                                    // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
+                                    // Begin color ramp at 0-stop with a 0-transparency color
+                                    // to create a blur-like effect.
+                                    'heatmap-color': [
+                                        'interpolate',
+                                        ['linear'],
+                                        ['heatmap-density'],
+                                        0, 'rgba(33, 102, 172, 0)',
+                                        0.2, 'rgba(103, 169, 207, 0.5)',
+                                        0.4, 'rgba(209, 229, 240, 0.5)',
+                                        0.6, 'rgba(253, 219, 199, 0.7)',
+                                        0.8, 'rgba(239, 138, 98, 0.8)',
+                                        1, 'rgba(178, 24, 43, 0.9)'
+                                    ] as any,
+                                    // Adjust the heatmap radius by zoom level
+                                    'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 15, 35],
+                                    // Transition from heatmap to circle layer by zoom level
+                                    'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 7, 1, 15, 0.8]
+                                }}
+                            />
                         </Source>
                     )}
 
