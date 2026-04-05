@@ -2,9 +2,11 @@ import { Drone } from '../../types';
 
 interface HubHeaderProps {
     drone: Drone;
+    activeTab: 'TELEMETRY' | 'LOGS';
+    setActiveTab: (tab: 'TELEMETRY' | 'LOGS') => void;
 }
 
-export default function HubHeader({ drone }: HubHeaderProps) {
+export default function HubHeader({ drone, activeTab, setActiveTab }: HubHeaderProps) {
     const batteryPct = drone.status.battery_pct;
 
     const getBatteryColor = () => {
@@ -46,6 +48,31 @@ export default function HubHeader({ drone }: HubHeaderProps) {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Tactical Tab Switcher */}
+            <div className="flex items-center bg-black/40 rounded-lg p-0.5 border border-white/5 mx-4">
+                <button 
+                    onClick={() => setActiveTab('TELEMETRY')}
+                    className={`px-4 py-1.5 rounded-md text-[8px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${
+                        activeTab === 'TELEMETRY' 
+                        ? 'bg-hud-accent/10 text-hud-accent shadow-[0_0_15px_rgba(94,234,212,0.1)]' 
+                        : 'text-white/30 hover:text-white/60'
+                    }`}
+                >
+                    Telemetry
+                </button>
+                <div className="w-px h-3 bg-white/10 mx-0.5" />
+                <button 
+                    onClick={() => setActiveTab('LOGS')}
+                    className={`px-4 py-1.5 rounded-md text-[8px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${
+                        activeTab === 'LOGS' 
+                        ? 'bg-hud-accent/10 text-hud-accent shadow-[0_0_15px_rgba(94,234,212,0.1)]' 
+                        : 'text-white/30 hover:text-white/60'
+                    }`}
+                >
+                    Tactical Logs
+                </button>
             </div>
 
             <div className="flex space-x-8 items-center bg-black/20 px-6 py-3 rounded-2xl border border-white/5 uppercase">

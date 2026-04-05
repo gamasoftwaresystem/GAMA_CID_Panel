@@ -15,7 +15,7 @@ export default function HubFooter({ drone }: HubFooterProps) {
     };
 
     return (
-        <div className="mt-5 pt-5 border-t border-white/5 flex justify-between items-center z-10">
+        <div className="mt-auto pt-4 border-t border-white/5 flex justify-between items-center z-10">
             <div className="flex space-x-12">
                 {/* Connection Status */}
                 <div className="flex flex-col group">
@@ -36,10 +36,10 @@ export default function HubFooter({ drone }: HubFooterProps) {
                 </div>
             </div>
 
-            {/* Inline Delivery Progress - Vertical Space-Efficient */}
-            <div className="flex items-center space-x-4 group min-w-[320px] bg-white/[0.03] px-4 py-2 rounded-xl border border-white/[0.05]">
+            {/* Inline Delivery Progress - Slimmer & More Tactical */}
+            <div className="flex items-center space-x-3 group min-w-[240px] bg-white/[0.02] px-2 py-1 rounded border border-white/[0.05]">
                 <span className="text-[9px] font-black text-white/40 tracking-[0.2em] uppercase shrink-0">Delivery</span>
-                <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden relative">
+                <div className="flex-1 h-1 bg-white/20 rounded-full overflow-hidden relative">
                     <div 
                         className="absolute inset-y-0 left-0 bg-hud-accent shadow-[0_0_12px_rgba(94,234,212,0.6)] transition-all duration-700 rounded-full"
                         style={{ width: `${(drone.fleet_mission?.progress || 0) * 100}%` }}

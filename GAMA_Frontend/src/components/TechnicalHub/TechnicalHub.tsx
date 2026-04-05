@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Drone } from '../../types';
 import HubHeader from './HubHeader';
 import HubInstruments from './HubInstruments';
+import HubLogs from './HubLogs';
 import HubFooter from './HubFooter';
 import SystemBriefing from './SystemBriefing';
 
@@ -10,6 +12,8 @@ interface TechnicalHubProps {
 }
 
 export default function TechnicalHub({ selectedDrone, drones }: TechnicalHubProps) {
+    const [activeTab, setActiveTab] = useState<'TELEMETRY' | 'LOGS'>('TELEMETRY');
+
     return (
         <div className="flex-1 flex flex-col relative h-full min-h-0 overflow-hidden">
             {selectedDrone ? (
@@ -26,8 +30,16 @@ export default function TechnicalHub({ selectedDrone, drones }: TechnicalHubProp
                         <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-px bg-white/20" />
                     </div>
                     
-                    <HubHeader drone={selectedDrone} />
-                    <HubInstruments drone={selectedDrone} />
+                    <HubHeader drone={selectedDrone} activeTab={activeTab} setActiveTab={setActiveTab} />
+                    
+                    <div className="flex-1 flex flex-col min-h-0 px-2 pt-2 pb-1">
+                        {activeTab === 'TELEMETRY' ? (
+                            <HubInstruments drone={selectedDrone} />
+                        ) : (
+                            <HubLogs drone={selectedDrone} />
+                        )}
+                    </div>
+                    
                     <HubFooter drone={selectedDrone} />
                 </div>
             ) : (
