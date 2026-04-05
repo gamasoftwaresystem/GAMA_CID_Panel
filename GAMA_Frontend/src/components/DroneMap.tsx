@@ -73,14 +73,28 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
         } else if (mapMode === 'camera') {
             mapRef.current.flyTo({ pitch: 65, bearing: -25, zoom: 14, duration: 2000, essential: true });
         } else if (mapMode === 'nav') {
-            const target = drones.find(d => d.drone_id === selectedDroneId) || drones[0];
+            const target = drones.find(d => d.drone_id === selectedDroneId);
             if (target && target.fleet_mission) {
-                mapRef.current.flyTo({ center: [target.navigation.lon, target.navigation.lat], zoom: 14.5, pitch: 45, bearing: 0, duration: 3000, essential: true });
+                mapRef.current.flyTo({ 
+                    center: [target.navigation.lon, target.navigation.lat], 
+                    zoom: 14.5, 
+                    pitch: 45, 
+                    bearing: target.navigation.heading, 
+                    duration: 3000, 
+                    essential: true 
+                });
             }
         } else if (mapMode === 'focus') {
-            const target = drones.find(d => d.drone_id === selectedDroneId) || drones[0];
+            const target = drones.find(d => d.drone_id === selectedDroneId);
             if (target) {
-                mapRef.current.flyTo({ center: [target.navigation.lon, target.navigation.lat], zoom: 17.5, pitch: 80, bearing: target.navigation.heading, duration: 3000, essential: true });
+                mapRef.current.flyTo({ 
+                    center: [target.navigation.lon, target.navigation.lat], 
+                    zoom: 17.5, 
+                    pitch: 80, 
+                    bearing: target.navigation.heading, 
+                    duration: 3000, 
+                    essential: true 
+                });
             }
         }
     }, [mapMode, selectedDroneId]);
@@ -454,7 +468,10 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                                     {is3DView && (
                                         <div
                                             className="cursor-pointer"
-                                            onClick={() => onSelectDrone(drone.drone_id)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onSelectDrone(drone.drone_id);
+                                            }}
                                             style={{ width: '60px', height: '60px', background: 'transparent', transform: 'translateZ(15px)' }}
                                         ></div>
                                     )}
@@ -464,7 +481,10 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                                             className={`cursor-pointer transition-transform duration-300 transform hover:scale-125
                                         ${isSelected ? 'scale-125 z-10' : 'scale-100 z-0'}
                                         `}
-                                            onClick={() => onSelectDrone(drone.drone_id)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onSelectDrone(drone.drone_id);
+                                            }}
                                         >
                                             <div className="relative">
                                                 {/* Pulse effect color matches mission */}

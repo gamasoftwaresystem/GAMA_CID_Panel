@@ -36,6 +36,7 @@ function App() {
   const [isControlCenterOpen, setIsControlCenterOpen] = useState(false);
   const [activeCommand, setActiveCommand] = useState<string | null>(null);
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
+  const [isMapMenuOpen, setIsMapMenuOpen] = useState(false);
 
   // Derived State
   const selectedDrone = drones.find((d) => d.drone_id === selectedDroneId);
@@ -50,6 +51,7 @@ function App() {
       if (id && activeNavId !== 'nav') {
         setPreviousNavId(activeNavId);
         setActiveNavId('nav');
+        setIsMapMenuOpen(true); // Auto-expand map menu when entering nav mode
       }
     }
     // Auto-close any expanded info when switching drones
@@ -97,6 +99,8 @@ function App() {
               onNavChange={setActiveNavId} 
               onSettingsClick={() => setIsSettingsOpen(!isSettingsOpen)} 
               isSettingsActive={isSettingsOpen} 
+              isMenuExpanded={isMapMenuOpen}
+              setIsMenuExpanded={setIsMapMenuOpen}
             />
             
             <MapSettings 

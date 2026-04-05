@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Map, Navigation2, Crosshair, Settings, Layers } from 'lucide-react';
 
 interface SidebarProps {
@@ -6,11 +5,18 @@ interface SidebarProps {
     onNavChange: (navId: string) => void;
     onSettingsClick: () => void;
     isSettingsActive: boolean;
+    isMenuExpanded: boolean;
+    setIsMenuExpanded: (expanded: boolean) => void;
 }
 
-export default function Sidebar({ activeNav, onNavChange, onSettingsClick, isSettingsActive }: SidebarProps) {
-    const [isMenuExpanded, setIsMenuExpanded] = useState(false);
-
+export default function Sidebar({ 
+    activeNav, 
+    onNavChange, 
+    onSettingsClick, 
+    isSettingsActive,
+    isMenuExpanded,
+    setIsMenuExpanded
+}: SidebarProps) {
     const menuItems = [
         { id: 'map', icon: Layers, label: 'Sky View' },
         { id: 'nav', icon: Navigation2, label: 'Navigation' },
