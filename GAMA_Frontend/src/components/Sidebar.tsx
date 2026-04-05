@@ -77,7 +77,7 @@ export default function Sidebar({
                 <button
                     onClick={onSettingsClick}
                     className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 ${isSettingsActive
-                        ? 'bg-hud-accent text-black shadow-[0_0_15px_rgba(94,234,212,0.5)] scale-105'
+                        ? 'bg-hud-accent/20 text-hud-accent border border-hud-accent/30 shadow-[0_0_12px_rgba(94,234,212,0.2)]'
                         : 'bg-white/5 border border-white/5 text-hud-text-muted hover:text-white hover:bg-white/10'
                         }`}
                 >
