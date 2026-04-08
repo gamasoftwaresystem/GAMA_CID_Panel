@@ -11,6 +11,7 @@ import { BrandingOverlay } from "./components/layout/BrandingOverlay";
 import { MapSettings } from "./components/panels/MapSettings";
 import { UavCenterPanel } from "./components/panels/UavCenterPanel";
 import { TacticalHubPanel } from "./components/panels/TacticalHubPanel";
+import { NetworkStatusPanel } from "./components/panels/NetworkStatusPanel";
 
 import "./App.css";
 
@@ -34,6 +35,7 @@ function App() {
   const [showHumanDensity, setShowHumanDensity] = useState(false);
   const [isUavCenterOpen, setIsUavCenterOpen] = useState(false);
   const [isControlCenterOpen, setIsControlCenterOpen] = useState(false);
+  const [isNetworkStatusOpen, setIsNetworkStatusOpen] = useState(false);
   const [activeCommand, setActiveCommand] = useState<string | null>(null);
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
   const [isMapMenuOpen, setIsMapMenuOpen] = useState(false);
@@ -135,6 +137,12 @@ function App() {
               activeCommand={activeCommand}
               handleCommandClick={onCommandClick}
             />
+
+            <NetworkStatusPanel 
+              isOpen={isNetworkStatusOpen}
+              onSelectDrone={handleDroneSelect}
+              drones={drones}
+            />
           </div>
 
           <ControlDock 
@@ -142,6 +150,8 @@ function App() {
             setIsUavCenterOpen={setIsUavCenterOpen}
             isControlCenterOpen={isControlCenterOpen}
             setIsControlCenterOpen={setIsControlCenterOpen}
+            isNetworkStatusOpen={isNetworkStatusOpen}
+            setIsNetworkStatusOpen={setIsNetworkStatusOpen}
           />
         </div>
 

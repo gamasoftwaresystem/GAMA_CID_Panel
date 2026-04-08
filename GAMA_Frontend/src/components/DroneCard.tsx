@@ -1,4 +1,4 @@
-import { Battery, Wifi, Info, X, Activity } from 'lucide-react';
+import { Wifi, Info, X, Activity, Navigation, Gauge, Diamond } from 'lucide-react';
 import { Drone } from '../types';
 
 interface DroneCardProps {
@@ -22,12 +22,14 @@ export default function DroneCard({
 
     // Mock tech specs base on ID
     const specs = {
-        manufacturer: drone.drone_id.startsWith('GAMA') ? 'GAMA Aerospace' : 'MED-Link Systems',
-        model: drone.drone_id.startsWith('GAMA') ? 'Falcon-X Strike' : 'Lifesaver-2',
-        mfgDate: 'Q3 2025',
-        type: 'Electric multirotor',
-        maxRange: '45km',
-        payload: '12.5kg'
+        manufacturer: 'Gama Drones',
+        model: 'eX3-HLM',
+        mfgDate: '26 July 2026',
+        belongs: 'Yemeksepeti',
+        lastUpdate: '14:03:82',
+        geofence: 'OK',
+        operatorHub: 'IST-3-HUB',
+        serviceId: 'G-02-EV'
     };
 
     // Get color based on battery level
@@ -38,17 +40,18 @@ export default function DroneCard({
     };
 
     // Get color based on battery level (Tailwind variant for glow/pulse)
-    const getBatteryClass = () => {
-        if (batteryPct > 70) return 'bg-hud-accent/60 shadow-[0_0_8px_rgba(94,234,212,0.5)]';
-        if (batteryPct > 20) return 'bg-hud-warning/60 shadow-[0_0_8px_rgba(234,179,8,0.5)]';
-        return 'bg-hud-danger/60 shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse';
-    };
-
     const getStatusText = () => {
         if (drone.status.mission_state === 'PICKUP') return 'Pending';
         if (drone.status.mission_state === 'DELIVERING') return 'In Service';
-        if (drone.status.mission_state === 'RETURNING') return 'Out of Service';
+        if (drone.status.mission_state === 'RETURNING') return 'Returning';
         return drone.status.mode || 'Standby';
+    };
+
+    const getStatusBadgeColor = () => {
+        if (drone.status.mission_state === 'PICKUP') return 'bg-hud-warning/10 text-hud-warning border-transparent';
+        if (drone.status.mission_state === 'DELIVERING') return 'bg-[#1a1608] text-[#fbbf24] border-[#fbbf24]/20 shadow-[0_0_10px_rgba(251,191,36,0.05)]';
+        if (drone.status.mission_state === 'RETURNING') return 'bg-blue-500/10 text-blue-400 border-transparent';
+        return 'bg-white/5 text-white/40 border-transparent';
     };
 
     return (
@@ -59,49 +62,98 @@ export default function DroneCard({
                     ? 'bg-white/10 border-white/20 shadow-lg scale-[1.02]'
                     : 'bg-black/40 border-white/5 hover:bg-black/50 hover:border-white/10'
                 }
-        ${isExpanded ? 'p-3' : 'p-2.5'}
+        ${isExpanded ? 'p-5' : 'p-4'}
       `}
         >
-            {/* Top Row: Main Content */}
-            <div className="flex items-center gap-3 w-full">
-                {/* Vertical Battery Bar */}
-                <div
-                    className={`w-1 transition-all duration-500 shrink-0 ${getBatteryClass()} ${isExpanded ? 'h-10' : 'h-7'}`}
-                    style={{ backgroundColor: getBatteryColor() }}
-                />
+            {/* Far Left: Solid Vertical Accent Bar (1:1 with image) */}
+            <div
+                className={`absolute left-0 top-0 bottom-0 w-[3px] transition-all duration-500 z-10 ${drone.status.mission_state === 'DELIVERING' ? 'bg-[#fbbf24]' : 'bg-hud-accent'}`}
+            />
 
-                {/* Drone Info */}
-                <div className="flex-1 min-w-0">
-                    <h3 className="text-white font-black text-[10px] uppercase tracking-[0.2em] mb-0.5 leading-none">
-                        {drone.drone_id}
-                    </h3>
-                    <div className="flex items-center gap-2">
-                        <p className="text-[8px] text-hud-text-muted uppercase font-bold tracking-widest truncate">
-                            {getStatusText()}
-                        </p>
-                        {!isExpanded && (
-                            <div className="flex items-center gap-1.5 opacity-30">
-                                <div className="flex items-center gap-0.5">
-                                    <Wifi className="w-2 h-2" />
-                                    <span className="text-[7px] font-mono leading-none">{drone.status.signal_dbm}</span>
-                                </div>
-                                <div className="flex items-center gap-0.5">
-                                    <Battery className="w-2 h-2" />
-                                    <span className="text-[7px] font-mono leading-none">{batteryPct.toFixed(0)}%</span>
-                                </div>
-                            </div>
-                        )}
-                    </div>
+            {/* Top Row: Main Content - Redesigned to match image layout */}
+            <div className="flex items-center gap-6 w-full relative pl-2">
+
+                {/* Section 1: Visual - Drone Image (Frameless) */}
+                <div className="w-20 h-16 flex items-center justify-center overflow-hidden shrink-0">
+                    <img 
+                        src="/card-drone.png" 
+                        alt="Drone" 
+                        className="w-full h-full object-contain brightness-75 group-hover:brightness-100 transition-all duration-500"
+                    />
                 </div>
 
-                {/* Info Toggle Button */}
-                <button
-                    className={`w-6 h-6 rounded-md flex items-center justify-center transition-all ${isExpanded ? 'bg-hud-accent/20 text-hud-accent shadow-[0_0_10px_rgba(94,234,212,0.2)]' : 'bg-white/5 text-hud-text-muted hover:text-white'}`}
-                    onClick={(e) => { e.stopPropagation(); onToggleExpand(); }}
-                >
-                    {isExpanded ? <X className="w-3 h-3" /> : <Info className="w-3.5 h-3.5" />}
-                </button>
+                {/* Section 2: Core Info - Center Column */}
+                <div className="flex-1 flex flex-col justify-center min-w-0">
+                    <h3 className="text-white font-black text-[13px] uppercase tracking-[0.2em] mb-1 leading-none">
+                        {drone.drone_id}
+                    </h3>
+                    <p className="text-[8px] text-white/30 uppercase font-black tracking-widest mb-1.5">
+                        {drone.status.mode === 'AUTO' ? 'CARGO X2' : 'MANUAL LINK'}
+                    </p>
+                    <p className="text-[8px] text-white/10 uppercase font-bold tracking-widest truncate">
+                        Station {drone.drone_id.split('-')[1] || 'Alpha'} Hub
+                    </p>
+                </div>
+
+                {/* Section 3: Operational Status - Right Column */}
+                <div className="flex flex-col items-end justify-between py-1.5 h-20 shrink-0 relative">
+                    {/* Status Badge */}
+                    <div className={`flex items-center gap-1.5 px-3 py-1 rounded border text-[7.5px] font-black uppercase tracking-widest shadow-sm transition-colors ${getStatusBadgeColor()}`}>
+                        <Diamond className="w-2 h-2 fill-current" />
+                        {getStatusText()}
+                    </div>
+
+                    {/* Battery Status - Aesthetic Refined */}
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-black text-white font-mono tracking-tighter leading-none">{batteryPct.toFixed(0)}%</span>
+                        <div className="flex gap-[1.5px] items-center h-2.5">
+                            {[...Array(8)].map((_, i) => (
+                                <div 
+                                    key={i}
+                                    className="w-[2.5px] h-full transition-all duration-500 rounded-full"
+                                    style={{ 
+                                        backgroundColor: batteryPct >= (i + 1) * 12.5 ? getBatteryColor() : 'rgba(255,255,255,0.05)',
+                                        boxShadow: batteryPct >= (i + 1) * 12.5 ? `0 0 8px ${getBatteryColor()}40` : 'none'
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Schedule / Flow + Integrated Info Button */}
+                    <div className="flex items-center gap-2">
+                        <p className="text-[7.5px] font-black text-white/10 uppercase tracking-[0.15em]">
+                            NEXT {new Date(Date.now() + 15 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                        <button
+                            className={`w-4 h-4 rounded flex items-center justify-center transition-all ${isExpanded ? 'text-hud-accent' : 'text-white/30 hover:text-white/80'}`}
+                            onClick={(e) => { e.stopPropagation(); onToggleExpand(); }}
+                        >
+                            {isExpanded ? <X className="w-2.5 h-2.5" /> : <Info className="w-3 h-3" />}
+                        </button>
+                    </div>
+                </div>
             </div>
+
+            {/* Tactical Metrics Row - Shifted to Expanded view only for direct image match */}
+            {isExpanded && (
+                <div className="mt-4 pt-3 border-t border-white/[0.05] flex items-center justify-between opacity-60">
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1.5">
+                            <Navigation className="w-2.5 h-2.5 rotate-45 text-hud-accent" />
+                            <span className="text-[8px] font-black font-mono tracking-tighter uppercase text-white/60">ALT {drone.navigation.alt_relative.toFixed(0)}m</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <Gauge className="w-2.5 h-2.5 text-hud-accent" />
+                            <span className="text-[8px] font-black font-mono tracking-tighter uppercase text-white/60">SPD {drone.navigation.ground_speed.toFixed(0)}m/s</span>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <Wifi className="w-2.5 h-2.5 text-hud-accent" />
+                        <span className="text-[8px] font-black font-mono tracking-tighter uppercase text-white/60">LINK OK</span>
+                    </div>
+                </div>
+            )}
 
             {/* Expanded Content: Technical Specs */}
             <div 
@@ -117,20 +169,20 @@ export default function DroneCard({
                         <span className="text-[8px] text-white font-bold">{specs.model}</span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-[7px] text-hud-text-muted uppercase font-black tracking-widest mb-0.5">Type</span>
-                        <span className="text-[8px] text-white font-bold">{specs.type}</span>
+                        <span className="text-[7px] text-hud-text-muted uppercase font-black tracking-widest mb-0.5">Belongs</span>
+                        <span className="text-[8px] text-white font-bold">{specs.belongs}</span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-[7px] text-hud-text-muted uppercase font-black tracking-widest mb-0.5">Max Range</span>
-                        <span className="text-[8px] text-hud-accent font-black">{specs.maxRange}</span>
+                        <span className="text-[7px] text-hud-text-muted uppercase font-black tracking-widest mb-0.5">Last Update</span>
+                        <span className="text-[8px] text-hud-accent font-black">{specs.lastUpdate}</span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-[7px] text-hud-text-muted uppercase font-black tracking-widest mb-0.5">Max Altitude</span>
-                        <span className="text-[8px] text-white/70 font-bold">2,500m MSL</span>
+                        <span className="text-[7px] text-hud-text-muted uppercase font-black tracking-widest mb-0.5">Geofence</span>
+                        <span className="text-[8px] text-white/70 font-bold">{specs.geofence}</span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-[7px] text-hud-text-muted uppercase font-black tracking-widest mb-0.5">Propulsion</span>
-                        <span className="text-[8px] text-white/70 font-bold">Brushless DC</span>
+                        <span className="text-[7px] text-hud-text-muted uppercase font-black tracking-widest mb-0.5">Operator Hub</span>
+                        <span className="text-[8px] text-white/70 font-bold">{specs.operatorHub}</span>
                     </div>
                     <div className="flex flex-col">
                         <span className="text-[7px] text-hud-text-muted uppercase font-black tracking-widest mb-0.5">Mfg. Date</span>
@@ -138,7 +190,7 @@ export default function DroneCard({
                     </div>
                     <div className="flex flex-col">
                         <span className="text-[7px] text-hud-text-muted uppercase font-black tracking-widest mb-0.5">Service ID</span>
-                        <span className="text-[8px] text-white/50 font-bold">G-{drone.drone_id.split('-')[1] || '000'}-ST</span>
+                        <span className="text-[8px] text-white/50 font-bold">{specs.serviceId}</span>
                     </div>
                 </div>
 

@@ -24,7 +24,7 @@ export const UavCenterPanel: React.FC<UavCenterPanelProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="glass-panel w-[420px] h-[450px] p-5 rounded-3xl hud-panel-enter shadow-[0_0_60px_rgba(0,0,0,0.9)] overflow-hidden pointer-events-auto">
+        <div className="glass-panel w-[520px] h-[450px] p-6 rounded-3xl hud-panel-enter shadow-[0_0_60px_rgba(0,0,0,0.9)] overflow-hidden pointer-events-auto">
             <div className="h-full flex flex-col">
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center space-x-3">

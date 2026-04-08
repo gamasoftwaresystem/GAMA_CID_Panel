@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import Map, { Marker, MapRef, Layer, Source } from 'react-map-gl';
+import Map, { Marker, MapRef, Layer, Source, Popup } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { X, Building2 } from 'lucide-react';
 import { Drone } from '../types';
 
 const DroneIcon = ({ className, style }: { className?: string, style?: React.CSSProperties }) => (
@@ -42,6 +43,26 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
         bearing: 0
     });
     const [hoveredZone, setHoveredZone] = useState<{ name: string; x: number; y: number } | null>(null);
+    const [selectedBaseId, setSelectedBaseId] = useState<string | null>(null);
+
+    const BASES_METADATA = [
+        {
+            id: 'base-maslak',
+            name: 'Maslak Hub Alpha',
+            coords: [29.015, 41.105],
+            drones: 14,
+            capacity: 20,
+            status: 'NOMINAL',
+        },
+        {
+            id: 'base-kadikoy',
+            name: 'Kadıköy Hub Delta',
+            coords: [29.030, 40.990],
+            drones: 8,
+            capacity: 12,
+            status: 'STANDBY',
+        }
+    ];
 
     // Mock Human Density Data Points (Istanbul Hotspots)
     const humanDensityData = {
@@ -166,6 +187,16 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                                         coordinates: [[
                                             [29.250, 40.940], [29.370, 40.940], [29.370, 40.860], [29.250, 40.860], [29.250, 40.940]
                                         ]] // Sabiha Gökçen SAW
+                                    }
+                                },
+                                {
+                                    type: 'Feature',
+                                    properties: { type: 'airport', name: 'Atatürk Havalimanı (LTBA)' },
+                                    geometry: {
+                                        type: 'Polygon',
+                                        coordinates: [[
+                                            [28.790, 41.010], [28.845, 41.010], [28.845, 40.965], [28.790, 40.965], [28.790, 41.010]
+                                        ]] // Atatürk Airport LTBA
                                     }
                                 },
                                 // Historical Peninsula (Polygon)
@@ -353,7 +384,7 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                                 <div className="w-4 h-4 rounded-full bg-white border-4 border-hud-accent shadow-lg mb-1" />
                             </Marker>
                             <Marker longitude={drones.find(d => d.drone_id === selectedDroneId)!.fleet_mission!.end_point[0]} latitude={drones.find(d => d.drone_id === selectedDroneId)!.fleet_mission!.end_point[1]} anchor="bottom">
-                                <div className="flex flex-col items-center animate-bounce">
+                                <div className="flex flex-col items-center hud-bounce-once">
                                     <div className="text-xs bg-hud-warning text-black font-bold px-2 py-0.5 rounded shadow whitespace-nowrap">TARGET</div>
                                     <div className="w-1 h-4 bg-hud-warning" />
                                     <div className="w-3 h-3 rounded-full bg-hud-warning shadow-[0_0_10px_rgba(234,179,8,1)]" />
@@ -516,6 +547,87 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                             </Marker>
                         );
                     })}
+
+                    {/* Base Markers and Info Popups */}
+                    {showBaseZones && BASES_METADATA.map(base => (
+                        <Marker
+                            key={base.id}
+                            longitude={base.coords[0]}
+                            latitude={base.coords[1]}
+                            anchor="center"
+                        >
+                            <div 
+                                className={`cursor-pointer transition-all duration-300 group pointer-events-auto ${selectedBaseId === base.id ? 'scale-125' : 'hover:scale-110'}`}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedBaseId(base.id === selectedBaseId ? null : base.id);
+                                }}
+                            >
+                                <div className="relative">
+                                    <div className={`p-2 rounded-xl border-2 backdrop-blur-md shadow-2xl relative
+                                        ${selectedBaseId === base.id 
+                                            ? 'bg-hud-accent/20 border-hud-accent text-hud-accent' 
+                                            : 'bg-hud-panel border-white/20 text-white/40 group-hover:text-white/80'}`}
+                                    >
+                                        <Building2 className="w-5 h-5" />
+                                    </div>
+                                </div>
+                            </div>
+                        </Marker>
+                    ))}
+
+                    {showBaseZones && selectedBaseId && (() => {
+                        const base = BASES_METADATA.find(b => b.id === selectedBaseId);
+                        if (!base) return null;
+                        return (
+                            <Popup
+                                longitude={base.coords[0]}
+                                latitude={base.coords[1]}
+                                anchor="top-left"
+                                closeButton={false}
+                                closeOnClick={false}
+                                className="base-info-popup"
+                            >
+                                <div className="glass-panel p-4 min-w-[180px] border-t border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] animate-in fade-in zoom-in duration-200">
+                                    {/* Header Section */}
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                            <h3 className="text-[12px] font-black text-white uppercase tracking-tight leading-none">{base.name}</h3>
+                                            <span className="text-[8px] font-bold text-hud-accent uppercase tracking-widest mt-1 block">Active Base</span>
+                                        </div>
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); setSelectedBaseId(null); }}
+                                            className="p-1 hover:bg-white/10 rounded-lg transition-colors"
+                                        >
+                                            <X className="w-3 h-3 text-white/40" />
+                                        </button>
+                                    </div>
+
+                                    {/* Simplified Content */}
+                                    <div className="space-y-2 mt-2">
+                                        <p className="text-[9px] text-hud-text-muted leading-tight">
+                                            Main central logistics hub for sector operations and fleet maintenance.
+                                        </p>
+                                        
+                                        <div className="pt-2 border-t border-white/5 space-y-1.5">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-[8px] font-bold text-white/20 uppercase">Location</span>
+                                                <span className="text-[9px] font-black text-white/60 font-mono tracking-tighter">
+                                                    {base.coords[1].toFixed(3)}°N, {base.coords[0].toFixed(3)}°E
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-[8px] font-bold text-white/20 uppercase tracking-wider">Units / Capacity</span>
+                                                <span className="text-[10px] font-black text-hud-accent font-mono">
+                                                    {base.drones} <span className="text-white/20 mx-0.5">/</span> {base.capacity}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Popup>
+                        );
+                    })()}
                 </Map>
             </div>
         </div>
