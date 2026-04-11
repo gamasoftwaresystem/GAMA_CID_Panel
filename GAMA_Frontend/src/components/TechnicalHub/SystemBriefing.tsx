@@ -4,10 +4,18 @@ interface SystemBriefingProps {
     drones: Drone[];
 }
 
-const CircularGauge = ({ value, label, color = '#5EEAD4' }: { value: number; label: string; color?: string }) => {
+const CircularGauge = ({ value, label }: { value: number; label: string }) => {
     const radius = 28;
     const circumference = 2 * Math.PI * radius;
     const offset = circumference - (value / 100) * circumference;
+
+    const getColor = (v: number) => {
+        if (v >= 85) return '#10b981'; // Green
+        if (v >= 50) return '#f59e0b'; // Yellow
+        return '#ef4444'; // Red
+    };
+
+    const color = getColor(value);
 
     return (
         <div className="flex flex-col items-center justify-center p-2 bg-white/[0.02] border border-white/5 rounded-xl group hover:bg-white/[0.04] transition-all">
@@ -20,7 +28,7 @@ const CircularGauge = ({ value, label, color = '#5EEAD4' }: { value: number; lab
                         r={radius}
                         fill="transparent"
                         stroke="currentColor"
-                        strokeWidth="3"
+                        strokeWidth="4"
                         className="text-white/[0.03]"
                     />
                     {/* Progress Circle */}
@@ -30,7 +38,7 @@ const CircularGauge = ({ value, label, color = '#5EEAD4' }: { value: number; lab
                         r={radius}
                         fill="transparent"
                         stroke={color}
-                        strokeWidth="3"
+                        strokeWidth="4"
                         strokeDasharray={circumference}
                         strokeDashoffset={offset}
                         strokeLinecap="round"
@@ -53,21 +61,21 @@ const CircularGauge = ({ value, label, color = '#5EEAD4' }: { value: number; lab
 
 export default function SystemBriefing({ drones }: SystemBriefingProps) {
     const flightStatus = {
-        inFlight: drones.filter(d => d.status.mission_state === 'PICKUP').length,
-        standby: drones.filter(d => !d.status.mission_state).length,
-        inService: drones.filter(d => d.status.mission_state === 'DELIVERING').length,
+        inService: drones.filter(d => d.status.mission_state === 'IN_SERVICE').length,
+        pending: drones.filter(d => d.status.mission_state === 'PENDING').length,
         returning: drones.filter(d => d.status.mission_state === 'RETURNING').length,
-        offline: 0
+        outOfService: drones.filter(d => d.status.mission_state === 'OUT_OF_SERVICE').length,
+        offline: drones.filter(d => d.status.mission_state === 'OFFLINE').length
     };
 
     const total = drones.length;
 
     const statusItems = [
-        { label: 'In Flight', count: flightStatus.inFlight, color: 'rgba(94, 234, 212, 0.6)' },
-        { label: 'Standby', count: flightStatus.standby, color: 'rgba(59, 130, 246, 0.6)' },
-        { label: 'In Service', count: flightStatus.inService, color: 'rgba(251, 191, 36, 0.6)' },
-        { label: 'Returning', count: flightStatus.returning, color: 'rgba(168, 85, 247, 0.6)' },
-        { label: 'Offline', count: flightStatus.offline, color: 'rgba(156, 163, 175, 0.4)' }
+        { label: 'In Service', count: flightStatus.inService, color: '#10b981' },
+        { label: 'Pending', count: flightStatus.pending, color: '#3b82f6' },
+        { label: 'Returning', count: flightStatus.returning, color: '#f59e0b' },
+        { label: 'Out of Service', count: flightStatus.outOfService, color: '#ef4444' },
+        { label: 'Offline', count: flightStatus.offline, color: '#64748b' }
     ];
 
     // Calculate segments for donut chart
@@ -82,19 +90,39 @@ export default function SystemBriefing({ drones }: SystemBriefingProps) {
     const donutRadius = 50;
     const donutCircumference = 2 * Math.PI * donutRadius;
 
+    const healthMetrics = [
+        { label: 'Stability', value: 96 },
+        { label: 'Connectivity', value: 89 },
+        { label: 'Fail-Safe', value: 100 },
+        { label: 'Energy', value: 92 }
+    ];
+
+    const isSystemCritical = healthMetrics.some(m => m.value < 50);
+
     return (
         <div className="flex-1 flex flex-col gap-4">
+            {/* System Alert Banner */}
+            {isSystemCritical && (
+                <div className="animate-pulse bg-hud-danger/20 border border-hud-danger/50 rounded-xl p-3 flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-hud-danger shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+                    <span className="text-[10px] font-black text-hud-danger uppercase tracking-[0.2em]">
+                        System Critical Alert: Low Mission Integrity
+                    </span>
+                </div>
+            )}
+
             {/* System Health Section */}
             <div className="flex flex-col space-y-2">
                 <div className="flex items-center justify-between px-1">
                     <span className="text-[9px] font-black text-hud-text-muted uppercase tracking-[0.2em]">System Health</span>
-                    <span className="text-[8px] font-bold text-hud-accent/40 uppercase tracking-widest">Nominal</span>
+                    <span className={`text-[8px] font-bold uppercase tracking-widest ${isSystemCritical ? 'text-hud-danger' : 'text-hud-accent/40'}`}>
+                        {isSystemCritical ? 'Warning' : 'Nominal'}
+                    </span>
                 </div>
                 <div className="grid grid-cols-4 gap-3">
-                    <CircularGauge label="Stability" value={96} color="rgba(94, 234, 212, 0.6)" />
-                    <CircularGauge label="Connectivity" value={89} color="rgba(94, 234, 212, 0.6)" />
-                    <CircularGauge label="Fail-Safe" value={100} color="rgba(94, 234, 212, 0.6)" />
-                    <CircularGauge label="Energy" value={92} color="rgba(251, 191, 36, 0.6)" />
+                    {healthMetrics.map(m => (
+                        <CircularGauge key={m.label} label={m.label} value={m.value} />
+                    ))}
                 </div>
             </div>
 
@@ -148,10 +176,10 @@ export default function SystemBriefing({ drones }: SystemBriefingProps) {
                         {statusItems.map((item) => (
                             <div key={item.label} className="flex justify-between items-center group transition-all hover:translate-x-1">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-1.5 h-1.5 rounded-full shadow-[0_0_4px_currentColor] opacity-60 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: item.color, color: item.color }} />
-                                    <span className="text-[9px] font-black text-white/10 group-hover:text-white/40 transition-colors uppercase tracking-widest">{item.label}</span>
+                                    <div className="w-1.5 h-1.5 rounded-sm rotate-45 shadow-[0_0_4px_currentColor] opacity-60 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: item.color, color: item.color }} />
+                                    <span className="text-[9px] font-black text-white/50 group-hover:text-white/90 transition-colors uppercase tracking-widest">{item.label}</span>
                                 </div>
-                                <span className="text-[11px] font-mono font-black text-white/60 group-hover:text-hud-accent transition-colors">{item.count}</span>
+                                <span className="text-[11px] font-mono font-black text-white/90 group-hover:text-hud-accent transition-colors">{item.count}</span>
                             </div>
                         ))}
                     </div>

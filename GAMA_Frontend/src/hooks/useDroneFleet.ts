@@ -20,7 +20,25 @@ export function useDroneFleet() {
         const movementSim = setInterval(() => {
             setDrones(prevDrones => prevDrones.map(drone => {
                 const speedKmph = drone.navigation.ground_speed;
-                if (speedKmph <= 0) return drone;
+                // Enforce stationary behavior for specific statuses
+                const isStationary = ['OFFLINE', 'OUT_OF_SERVICE', 'PENDING'].includes(drone.status.mission_state || '');
+                if (isStationary || speedKmph <= 0) {
+                    return {
+                        ...drone,
+                        navigation: {
+                            ...drone.navigation,
+                            ground_speed: 0,
+                            pitch: (Math.sin(Date.now() / 2500) * 1), // Subtle breathing
+                            roll: (Math.cos(Date.now() / 3500) * 1)
+                        },
+                        status: {
+                            ...drone.status,
+                            battery_pct: drone.status.mission_state === 'OUT_OF_SERVICE' 
+                                ? Math.min(100, drone.status.battery_pct + 0.01) // Charging
+                                : Math.max(0, drone.status.battery_pct - 0.0001) // Low drain
+                        }
+                    };
+                }
 
                 let nextLat = drone.navigation.lat;
                 let nextLon = drone.navigation.lon;
@@ -48,6 +66,7 @@ export function useDroneFleet() {
                     } else {
                         nextLon = points[totalSegments][0];
                         nextLat = points[totalSegments][1];
+                        // If it's returning and reached the end, it should stop or loiter
                     }
                     drone.fleet_mission.progress = newProgress;
                 } else {

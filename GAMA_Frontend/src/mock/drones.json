@@ -8,14 +8,14 @@
             "health": "GOOD",
             "battery_pct": 82,
             "signal_dbm": -65,
-            "mission_state": "DELIVERING"
+            "mission_state": "IN_SERVICE"
         },
         "navigation": {
-            "lat": 41.045,
-            "lon": 28.985,
+            "lat": 41.105,
+            "lon": 29.015,
             "alt_relative": 12.5,
             "ground_speed": 4.2,
-            "heading": 90,
+            "heading": 135,
             "pitch": 5,
             "roll": -3
         },
@@ -40,27 +40,28 @@
         },
         "fleet_mission": {
             "start_point": [
+                29.015,
+                41.105
+            ],
+            "end_point": [
                 28.985,
                 41.045
             ],
-            "end_point": [
-                29.0285,
-                41.0694
-            ],
             "route": [
                 [
-                    28.985,
-                    41.045
+                    29.015,
+                    41.105
                 ],
                 [
                     29.002,
-                    41.056
+                    41.075
                 ],
                 [
-                    29.0285,
-                    41.0694
+                    28.985,
+                    41.045
                 ]
-            ]
+            ],
+            "progress": 0.2
         }
     },
     {
@@ -70,18 +71,18 @@
             "mode": "MANUAL",
             "armed": true,
             "health": "GOOD",
-            "battery_pct": 45,
+            "battery_pct": 85,
             "signal_dbm": -72,
-            "mission_state": "PICKUP"
+            "mission_state": "PENDING"
         },
         "navigation": {
-            "lat": 41.075,
-            "lon": 29.01,
-            "alt_relative": 45,
-            "ground_speed": 12.5,
-            "heading": 180,
-            "pitch": -2,
-            "roll": 12
+            "lat": 41.105,
+            "lon": 29.015,
+            "alt_relative": 0,
+            "ground_speed": 0,
+            "heading": 0,
+            "pitch": 0,
+            "roll": 0
         },
         "ai_analytics": {
             "detections": [],
@@ -90,26 +91,6 @@
         "sensors": {
             "lidar_min_dist": 15,
             "cpu_temp": 52
-        },
-        "fleet_mission": {
-            "start_point": [
-                29.01,
-                41.075
-            ],
-            "end_point": [
-                29.017,
-                41.1189
-            ],
-            "route": [
-                [
-                    29.01,
-                    41.075
-                ],
-                [
-                    29.017,
-                    41.1189
-                ]
-            ]
         }
     },
     {
@@ -128,7 +109,7 @@
             "lon": 29.006,
             "alt_relative": 80,
             "ground_speed": 15,
-            "heading": 270,
+            "heading": 350,
             "pitch": 15,
             "roll": -8
         },
@@ -146,8 +127,8 @@
                 41.042
             ],
             "end_point": [
-                28.9918,
-                41.0693
+                29.015,
+                41.105
             ],
             "route": [
                 [
@@ -155,10 +136,15 @@
                     41.042
                 ],
                 [
-                    28.9918,
-                    41.0693
+                    29.010,
+                    41.070
+                ],
+                [
+                    29.015,
+                    41.105
                 ]
-            ]
+            ],
+            "progress": 0.4
         }
     },
     {
@@ -170,16 +156,16 @@
             "health": "GOOD",
             "battery_pct": 95,
             "signal_dbm": -55,
-            "mission_state": "PICKUP"
+            "mission_state": "OFFLINE"
         },
         "navigation": {
-            "lat": 41.065,
-            "lon": 28.995,
-            "alt_relative": 120,
-            "ground_speed": 18,
-            "heading": 45,
-            "pitch": 8,
-            "roll": 15
+            "lat": 40.990,
+            "lon": 29.030,
+            "alt_relative": 0,
+            "ground_speed": 0,
+            "heading": 180,
+            "pitch": 0,
+            "roll": 0
         },
         "ai_analytics": {
             "detections": [],
@@ -188,26 +174,6 @@
         "sensors": {
             "lidar_min_dist": 40,
             "cpu_temp": 42
-        },
-        "fleet_mission": {
-            "start_point": [
-                28.995,
-                41.065
-            ],
-            "end_point": [
-                28.9654,
-                41.0873
-            ],
-            "route": [
-                [
-                    28.995,
-                    41.065
-                ],
-                [
-                    28.9654,
-                    41.0873
-                ]
-            ]
         }
     },
     {
@@ -219,14 +185,14 @@
             "health": "GOOD",
             "battery_pct": 78,
             "signal_dbm": -68,
-            "mission_state": "DELIVERING"
+            "mission_state": "IN_SERVICE"
         },
         "navigation": {
-            "lat": 40.985,
-            "lon": 29.025,
+            "lat": 40.990,
+            "lon": 29.030,
             "alt_relative": 150,
             "ground_speed": 22.5,
-            "heading": 0,
+            "heading": 60,
             "pitch": 2,
             "roll": -2
         },
@@ -240,23 +206,28 @@
         },
         "fleet_mission": {
             "start_point": [
-                29.025,
-                40.985
+                29.030,
+                40.990
             ],
             "end_point": [
-                29.018,
-                40.9386
+                29.080,
+                41.020
             ],
             "route": [
                 [
-                    29.025,
-                    40.985
+                    29.030,
+                    40.990
                 ],
                 [
-                    29.018,
-                    40.9386
+                    29.050,
+                    41.005
+                ],
+                [
+                    29.080,
+                    41.020
                 ]
-            ]
+            ],
+            "progress": 0.3
         }
     },
     {
@@ -265,43 +236,23 @@
         "status": {
             "mode": "MANUAL",
             "armed": true,
-            "health": "WARNING",
-            "battery_pct": 32,
+            "health": "CRITICAL",
+            "battery_pct": 8,
             "signal_dbm": -78,
-            "mission_state": "RETURNING"
+            "mission_state": "OUT_OF_SERVICE"
         },
         "navigation": {
-            "lat": 41.025,
-            "lon": 29.015,
-            "alt_relative": 65,
-            "ground_speed": 8,
-            "heading": 220,
-            "pitch": -5,
-            "roll": -10
+            "lat": 40.990,
+            "lon": 29.030,
+            "alt_relative": 0,
+            "ground_speed": 0,
+            "heading": 90,
+            "pitch": 0,
+            "roll": 0
         },
         "sensors": {
             "lidar_min_dist": 12,
             "cpu_temp": 68
-        },
-        "fleet_mission": {
-            "start_point": [
-                29.015,
-                41.025
-            ],
-            "end_point": [
-                28.968,
-                41.011
-            ],
-            "route": [
-                [
-                    29.015,
-                    41.025
-                ],
-                [
-                    28.968,
-                    41.011
-                ]
-            ]
         }
     }
 ]

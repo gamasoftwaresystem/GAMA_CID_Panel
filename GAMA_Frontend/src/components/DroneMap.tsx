@@ -473,10 +473,12 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
 
                         const getMissionColor = (state?: string) => {
                             switch (state) {
-                                case 'PICKUP': return '#9ACEEB'; // Sky Blue
-                                case 'DELIVERING': return '#fbbf24'; // Pure Golden Yellow
-                                case 'RETURNING': return '#ff0000'; // Pure Tactical Red
-                                default: return '#cbd5e1'; // Neutral Slate/Grey for units with no assigned state
+                                case 'IN_SERVICE': return '#10b981'; // Green
+                                case 'PENDING': return '#3b82f6'; // Blue
+                                case 'RETURNING': return '#f59e0b'; // Yellow
+                                case 'OUT_OF_SERVICE': return '#ef4444'; // Red
+                                case 'OFFLINE': return '#64748b'; // Gray
+                                default: return '#cbd5e1'; // Neutral
                             }
                         };
                         const missionColor = getMissionColor(drone.status.mission_state);
@@ -519,8 +521,8 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                                         >
                                             <div className="relative">
                                                 {/* Pulse effect color matches mission */}
-                                                {drone.status.mode === 'AUTO' && (
-                                                    <div className="absolute inset-0 rounded-full animate-ping opacity-40 w-8 h-8 -left-1 -top-1"
+                                                {(drone.status.mode === 'AUTO' || drone.status.mission_state === 'OUT_OF_SERVICE') && (
+                                                    <div className={`absolute inset-0 rounded-full animate-ping opacity-40 w-8 h-8 -left-1 -top-1`}
                                                         style={{ backgroundColor: missionColor }}
                                                     />
                                                 )}

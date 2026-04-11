@@ -1,0 +1,93 @@
+{
+    "pilots": [
+        {
+            "id": "P-4402",
+            "name": "Umid Bayramov",
+            "rank": "Senior Command Pilot",
+            "license": "SHGM-UAV2-8821",
+            "assigned_drones": ["GAMA-01", "GAMA-02"],
+            "base": "Maslak Hub Alpha",
+            "experience": "850+ Flight Hours",
+            "status": "ACTIVE"
+        },
+        {
+            "id": "P-9912",
+            "name": "Sarah Connor",
+            "rank": "Medical Response Specialist",
+            "license": "SHGM-UAV1-4432",
+            "assigned_drones": ["MED-01"],
+            "base": "Kadıköy Hub Delta",
+            "experience": "420+ Flight Hours",
+            "status": "ACTIVE"
+        },
+        {
+            "id": "P-2210",
+            "name": "Jack Reacher",
+            "rank": "Logistics Operations Manager",
+            "license": "SHGM-UAV2-1109",
+            "assigned_drones": ["HVY-X9", "GAMA-04"],
+            "base": "Kadıköy Hub Delta",
+            "experience": "1200+ Flight Hours",
+            "status": "ON_LEAVE"
+        }
+    ],
+    "hubs": [
+        {
+            "id": "HUB-ALPHA",
+            "name": "Maslak Hub Alpha",
+            "manager": "Umid Bayramov",
+            "provider": "GamaTech Systems",
+            "pilots": ["P-4402"],
+            "drones": ["GAMA-01", "GAMA-02", "GAMA-03"],
+            "coverage_radius": "25km",
+            "central_status": "OPERATIONAL",
+            "air_corridors": [
+                { "id": "C-1", "path": "Maslak -> Beşiktaş", "status": "CLEAR" },
+                { "id": "C-2", "path": "Maslak -> Sarıyer", "status": "CONGESTED" }
+            ]
+        },
+        {
+            "id": "HUB-DELTA",
+            "name": "Kadıköy Hub Delta",
+            "manager": "Sarah Connor",
+            "provider": "MedSky Global",
+            "pilots": ["P-9912", "P-2210"],
+            "drones": ["MED-01", "HVY-X9", "GAMA-04"],
+            "coverage_radius": "30km",
+            "central_status": "OPERATIONAL",
+            "air_corridors": [
+                { "id": "C-3", "path": "Kadıköy -> Üsküdar", "status": "CLEAR" },
+                { "id": "C-4", "path": "Kadıköy -> Bostancı", "status": "RESTRICTED" }
+            ]
+        }
+    ],
+    "asset_specs": {
+        "GAMA": {
+            "model": "GAMA-V2 Interceptor",
+            "manufacturer": "Gama Drones Corp",
+            "power_system": "12S LiPo / 22000mAh",
+            "motors": "4x T-Motor U13",
+            "payload_cap": "5kg",
+            "max_flight_time": "45min",
+            "registration": "TR-G-001/TR-G-099"
+        },
+        "MED": {
+            "model": "MED-XL Lifesaver",
+            "manufacturer": "Gama Bio-Logistics",
+            "power_system": "14S LiPo / 30000mAh",
+            "motors": "6x Multirotor X Series",
+            "payload_cap": "12kg (Refined Thermals)",
+            "max_flight_time": "35min",
+            "registration": "TR-M-001/TR-M-020"
+        },
+        "HVY": {
+            "model": "HVY-X9 Titan",
+            "manufacturer": "Gama Industrial",
+            "power_system": "Hybrid Turbine / Electric",
+            "motors": "8x Coaxial Heavy",
+            "payload_cap": "50kg",
+            "max_flight_time": "4h 15min",
+            "registration": "TR-H-001/TR-H-010"
+        }
+    }
+}

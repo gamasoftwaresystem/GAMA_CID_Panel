@@ -10,7 +10,7 @@ export interface DroneStatus {
     health: 'GOOD' | 'WARNING' | 'CRITICAL';
     battery_pct: number;
     signal_dbm: number;
-    mission_state?: 'DELIVERING' | 'PICKUP' | 'RETURNING'; // New field for color-coding
+    mission_state?: 'IN_SERVICE' | 'PENDING' | 'RETURNING' | 'OUT_OF_SERVICE' | 'OFFLINE'; // Standardized statuses
 }
 
 export interface DroneNavigation {

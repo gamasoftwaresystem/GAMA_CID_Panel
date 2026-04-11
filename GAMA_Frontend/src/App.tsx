@@ -44,16 +44,18 @@ function App() {
   const selectedDrone = drones.find((d) => d.drone_id === selectedDroneId);
 
   // Handlers
-  const handleDroneSelect = (id: string | null) => {
-    if (selectedDroneId === id) {
+  const handleDroneSelect = (id: string | null, toggle = true) => {
+    const isTrackingMode = activeNavId === 'nav' || activeNavId === 'focus';
+
+    if (toggle && selectedDroneId === id && !isTrackingMode) {
       setSelectedDroneId(null);
       setActiveNavId(previousNavId);
     } else {
       setSelectedDroneId(id);
-      if (id && activeNavId !== 'nav') {
+      if (id && !isTrackingMode) {
         setPreviousNavId(activeNavId);
         setActiveNavId('nav');
-        setIsMapMenuOpen(true); // Auto-expand map menu when entering nav mode
+        setIsMapMenuOpen(true);
       }
     }
     // Auto-close any expanded info when switching drones

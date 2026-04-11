@@ -22,7 +22,11 @@ export const ControlDock: React.FC<ControlDockProps> = ({
         <div className="mac-dock">
             <div
                 className={`mac-dock-item group ${isUavCenterOpen ? 'active' : ''}`}
-                onClick={() => setIsUavCenterOpen(!isUavCenterOpen)}
+                onClick={() => {
+                    const nextState = !isUavCenterOpen;
+                    setIsUavCenterOpen(nextState);
+                    if (nextState) setIsNetworkStatusOpen(false);
+                }}
             >
                 <Layers className="w-5 h-5" />
                 <div className="active-dot" />
@@ -33,7 +37,11 @@ export const ControlDock: React.FC<ControlDockProps> = ({
 
             <div
                 className={`mac-dock-item group ${isControlCenterOpen ? 'active' : ''}`}
-                onClick={() => setIsControlCenterOpen(!isControlCenterOpen)}
+                onClick={() => {
+                    const nextState = !isControlCenterOpen;
+                    setIsControlCenterOpen(nextState);
+                    if (nextState) setIsNetworkStatusOpen(false);
+                }}
             >
                 <Radio className="w-5 h-5" />
                 <div className="active-dot" />
@@ -44,7 +52,14 @@ export const ControlDock: React.FC<ControlDockProps> = ({
 
             <div
                 className={`mac-dock-item group ${isNetworkStatusOpen ? 'active' : ''}`}
-                onClick={() => setIsNetworkStatusOpen(!isNetworkStatusOpen)}
+                onClick={() => {
+                    const nextState = !isNetworkStatusOpen;
+                    setIsNetworkStatusOpen(nextState);
+                    if (nextState) {
+                        setIsUavCenterOpen(false);
+                        setIsControlCenterOpen(false);
+                    }
+                }}
             >
                 <Globe className="w-5 h-5" />
                 <div className="active-dot" />

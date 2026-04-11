@@ -10,10 +10,10 @@ interface DroneCardProps {
     onToggleExpand: () => void;
 }
 
-export default function DroneCard({ 
-    drone, 
-    onClick, 
-    onOpenTechnicalHub, 
+export default function DroneCard({
+    drone,
+    onClick,
+    onOpenTechnicalHub,
     selected,
     isExpanded,
     onToggleExpand
@@ -41,17 +41,35 @@ export default function DroneCard({
 
     // Get color based on battery level (Tailwind variant for glow/pulse)
     const getStatusText = () => {
-        if (drone.status.mission_state === 'PICKUP') return 'Pending';
-        if (drone.status.mission_state === 'DELIVERING') return 'In Service';
-        if (drone.status.mission_state === 'RETURNING') return 'Returning';
-        return drone.status.mode || 'Standby';
+        switch (drone.status.mission_state) {
+            case 'IN_SERVICE': return 'In Service';
+            case 'PENDING': return 'Pending';
+            case 'RETURNING': return 'Returning';
+            case 'OUT_OF_SERVICE': return 'Out of Service';
+            case 'OFFLINE': return 'Offline';
+            default: return drone.status.mode || 'Standby';
+        }
+    };
+
+    const getPilotStatus = () => {
+        switch (drone.status.mode) {
+            case 'MANUAL': return 'Pilot';
+            case 'AUTO': return 'Auto Pilot';
+            case 'RTL':
+            case 'GUIDED': return 'Nav Auto Pilot';
+            default: return 'Auto Pilot';
+        }
     };
 
     const getStatusBadgeColor = () => {
-        if (drone.status.mission_state === 'PICKUP') return 'bg-hud-warning/10 text-hud-warning border-transparent';
-        if (drone.status.mission_state === 'DELIVERING') return 'bg-[#1a1608] text-[#fbbf24] border-[#fbbf24]/20 shadow-[0_0_10px_rgba(251,191,36,0.05)]';
-        if (drone.status.mission_state === 'RETURNING') return 'bg-blue-500/10 text-blue-400 border-transparent';
-        return 'bg-white/5 text-white/40 border-transparent';
+        switch (drone.status.mission_state) {
+            case 'IN_SERVICE': return 'bg-[#0c0c0c] text-[#10b981] border-[#10b981]/20 shadow-[0_0_15px_rgba(16,185,129,0.05)]';
+            case 'PENDING': return 'bg-[#0c0c0c] text-[#3b82f6] border-[#3b82f6]/20 shadow-[0_0_15px_rgba(59,130,246,0.05)]';
+            case 'RETURNING': return 'bg-[#0c0c0c] text-[#f59e0b] border-[#f59e0b]/20 shadow-[0_0_15px_rgba(245,158,11,0.05)]';
+            case 'OUT_OF_SERVICE': return 'bg-[#0c0c0c] text-[#ef4444] border-[#ef4444]/20 shadow-[0_0_15px_rgba(239,68,68,0.05)]';
+            case 'OFFLINE': return 'bg-[#0c0c0c] text-[#64748b] border-[#64748b]/20';
+            default: return 'bg-[#0c0c0c] text-white/40 border-white/10';
+        }
     };
 
     return (
@@ -67,7 +85,13 @@ export default function DroneCard({
         >
             {/* Far Left: Solid Vertical Accent Bar (1:1 with image) */}
             <div
-                className={`absolute left-0 top-0 bottom-0 w-[3px] transition-all duration-500 z-10 ${drone.status.mission_state === 'DELIVERING' ? 'bg-[#fbbf24]' : 'bg-hud-accent'}`}
+                className={`absolute left-0 top-0 bottom-0 w-[3px] transition-all duration-500 z-10 ${drone.status.mission_state === 'IN_SERVICE' ? 'bg-[#10b981]' :
+                    drone.status.mission_state === 'PENDING' ? 'bg-[#3b82f6]' :
+                        drone.status.mission_state === 'RETURNING' ? 'bg-[#f59e0b]' :
+                            drone.status.mission_state === 'OUT_OF_SERVICE' ? 'bg-[#ef4444]' :
+                                drone.status.mission_state === 'OFFLINE' ? 'bg-[#64748b]' :
+                                    'bg-hud-accent'
+                    }`}
             />
 
             {/* Top Row: Main Content - Redesigned to match image layout */}
@@ -75,9 +99,9 @@ export default function DroneCard({
 
                 {/* Section 1: Visual - Drone Image (Frameless) */}
                 <div className="w-20 h-16 flex items-center justify-center overflow-hidden shrink-0">
-                    <img 
-                        src="/card-drone.png" 
-                        alt="Drone" 
+                    <img
+                        src="/card-drone.png"
+                        alt="Drone"
                         className="w-full h-full object-contain brightness-75 group-hover:brightness-100 transition-all duration-500"
                     />
                 </div>
@@ -88,9 +112,9 @@ export default function DroneCard({
                         {drone.drone_id}
                     </h3>
                     <p className="text-[8px] text-white/30 uppercase font-black tracking-widest mb-1.5">
-                        {drone.status.mode === 'AUTO' ? 'CARGO X2' : 'MANUAL LINK'}
+                        {getPilotStatus()}
                     </p>
-                    <p className="text-[8px] text-white/10 uppercase font-bold tracking-widest truncate">
+                    <p className="text-[6px] text-white/30 uppercase font-bold tracking-widest truncate">
                         Station {drone.drone_id.split('-')[1] || 'Alpha'} Hub
                     </p>
                 </div>
@@ -98,8 +122,8 @@ export default function DroneCard({
                 {/* Section 3: Operational Status - Right Column */}
                 <div className="flex flex-col items-end justify-between py-1.5 h-20 shrink-0 relative">
                     {/* Status Badge */}
-                    <div className={`flex items-center gap-1.5 px-3 py-1 rounded border text-[7.5px] font-black uppercase tracking-widest shadow-sm transition-colors ${getStatusBadgeColor()}`}>
-                        <Diamond className="w-2 h-2 fill-current" />
+                    <div className={`flex items-center gap-2 px-4 py-1.5 rounded-lg border text-[8px] font-black uppercase tracking-[0.2em] shadow-lg transition-all duration-300 ${getStatusBadgeColor()}`}>
+                        <Diamond className="w-2.5 h-2.5 fill-current" />
                         {getStatusText()}
                     </div>
 
@@ -108,10 +132,10 @@ export default function DroneCard({
                         <span className="text-[10px] font-black text-white font-mono tracking-tighter leading-none">{batteryPct.toFixed(0)}%</span>
                         <div className="flex gap-[1.5px] items-center h-2.5">
                             {[...Array(8)].map((_, i) => (
-                                <div 
+                                <div
                                     key={i}
                                     className="w-[2.5px] h-full transition-all duration-500 rounded-full"
-                                    style={{ 
+                                    style={{
                                         backgroundColor: batteryPct >= (i + 1) * 12.5 ? getBatteryColor() : 'rgba(255,255,255,0.05)',
                                         boxShadow: batteryPct >= (i + 1) * 12.5 ? `0 0 8px ${getBatteryColor()}40` : 'none'
                                     }}
@@ -123,7 +147,7 @@ export default function DroneCard({
                     {/* Schedule / Flow + Integrated Info Button */}
                     <div className="flex items-center gap-2">
                         <p className="text-[7.5px] font-black text-white/10 uppercase tracking-[0.15em]">
-                            NEXT {new Date(Date.now() + 15 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            İnfo
                         </p>
                         <button
                             className={`w-4 h-4 rounded flex items-center justify-center transition-all ${isExpanded ? 'text-hud-accent' : 'text-white/30 hover:text-white/80'}`}
@@ -156,7 +180,7 @@ export default function DroneCard({
             )}
 
             {/* Expanded Content: Technical Specs */}
-            <div 
+            <div
                 className={`overflow-hidden transition-all duration-500 ease-in-out ${isExpanded ? 'max-h-56 opacity-100 mt-3 pt-3 border-t border-white/5' : 'max-h-0 opacity-0 pointer-events-none'}`}
             >
                 <div className="grid grid-cols-2 gap-x-4 gap-y-3">

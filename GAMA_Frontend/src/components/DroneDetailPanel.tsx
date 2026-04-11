@@ -362,8 +362,11 @@ export default function DroneDetailPanel({ drone, onClose }: DroneDetailProps) {
                                     </div>
                                     <div className="w-px h-8 bg-white/10"></div>
                                     <div className="flex flex-col items-center">
-                                        <span className="text-[8px] text-white/40 uppercase font-black tracking-widest mb-1">Mission Phase</span>
-                                        <span className="text-sm text-white font-black uppercase tracking-widest">{drone.status.mission_state}</span>
+                                        <span className="text-[8px] text-white/40 uppercase font-black tracking-widest mb-2">Mission Phase</span>
+                                        <div className="flex items-center gap-2 px-6 py-1.5 rounded-full bg-[#0c0c0c] border border-hud-accent/20 shadow-lg transition-all duration-300">
+                                            <div className="w-2 h-2 rounded-sm bg-hud-accent rotate-45 shadow-[0_0_8px_rgba(94,234,212,0.4)]" />
+                                            <span className="text-[10px] text-hud-accent font-black uppercase tracking-[0.2em]">{drone.status.mission_state}</span>
+                                        </div>
                                     </div>
                                     <div className="w-px h-8 bg-white/10"></div>
                                     <div className="flex flex-col items-center">

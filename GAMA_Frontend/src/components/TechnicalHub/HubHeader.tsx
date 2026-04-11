@@ -39,9 +39,10 @@ export default function HubHeader({ drone, activeTab, setActiveTab }: HubHeaderP
                             {drone.drone_id}
                         </span>
                         <div className="flex items-center space-x-2 mt-1">
-                            <span className="px-1.5 py-0.5 rounded-sm bg-white/[0.03] text-hud-accent text-[6px] font-black tracking-[0.15em] uppercase border border-hud-accent/20">
+                            <div className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#0c0c0c] text-hud-accent text-[7px] font-black tracking-[0.15em] uppercase border border-hud-accent/20 shadow-md">
+                                <div className="w-1.5 h-1.5 rounded-sm bg-hud-accent rotate-45 shadow-[0_0_8px_rgba(94,234,212,0.4)]" />
                                 {drone.status.mode}
-                            </span>
+                            </div>
                             <span className="px-1.5 py-0.5 rounded-sm bg-white/[0.03] text-white/30 text-[6px] font-black tracking-[0.15em] uppercase border border-white/5">
                                 NAV LOCK ON
                             </span>
