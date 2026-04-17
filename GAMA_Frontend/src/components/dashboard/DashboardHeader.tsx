@@ -1,11 +1,12 @@
-import { Thermometer, Cloud, Wind, Maximize } from 'lucide-react';
+import { Thermometer, Cloud, Wind, Maximize, LogOut } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface DashboardHeaderProps {
     weatherData: { temp: string; condition: string; wind: string } | null;
+    onLogout?: () => void;
 }
 
-export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ weatherData }) => {
+export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ weatherData, onLogout }) => {
     const [isAppFullscreen, setIsAppFullscreen] = useState(false);
 
     const toggleAppFullscreen = () => {
@@ -40,7 +41,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ weatherData })
             </div>
 
             {/* Top Right Widgets */}
-            <div className="flex space-x-3 pointer-events-auto">
+            <div className="flex space-x-3 pointer-events-auto items-center">
                 <div className="glass-pill px-6 h-12 flex items-center space-x-5 text-xs font-medium text-hud-text-muted">
                     {weatherData ? (
                         <>
@@ -55,6 +56,16 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ weatherData })
                         </div>
                     )}
                 </div>
+
+                {onLogout && (
+                    <button 
+                        onClick={onLogout}
+                        className="glass-pill w-12 h-12 flex items-center justify-center text-hud-danger/60 hover:text-hud-danger hover:bg-hud-danger/10 transition-all border border-transparent hover:border-hud-danger/20"
+                        title="Sign Out"
+                    >
+                        <LogOut className="w-5 h-5" />
+                    </button>
+                )}
             </div>
         </header>
     );

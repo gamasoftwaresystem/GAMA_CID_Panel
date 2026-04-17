@@ -49,3 +49,13 @@ export interface Drone {
     sensors: DroneSensors;
     fleet_mission?: DroneFleetMission; // Static route data
 }
+
+export type UserRole = 'operator' | 'pilot';
+
+export interface User {
+    id: string;
+    username: string;
+    role: UserRole;
+    lastLogin: string;
+    assignedDroneId?: string;
+}

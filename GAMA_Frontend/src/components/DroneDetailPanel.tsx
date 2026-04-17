@@ -7,9 +7,10 @@ import '@tensorflow/tfjs';
 interface DroneDetailProps {
     drone: Drone;
     onClose: () => void;
+    isIntegrated?: boolean;
 }
 
-export default function DroneDetailPanel({ drone, onClose }: DroneDetailProps) {
+export default function DroneDetailPanel({ drone, onClose, isIntegrated = false }: DroneDetailProps) {
     const [isManualMode, setIsManualMode] = useState(drone.status.mode === 'MANUAL');
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -158,7 +159,7 @@ export default function DroneDetailPanel({ drone, onClose }: DroneDetailProps) {
     }, [model]);
 
     return (
-        <div className={`glass-panel p-0 flex flex-col pointer-events-auto overflow-hidden relative group transition-all duration-300 ${isFullscreen ? 'fixed inset-0 w-screen h-screen z-50 rounded-none' : 'w-[1100px] h-[750px]'}`}>
+        <div className={`glass-panel p-0 flex flex-col pointer-events-auto overflow-hidden relative group transition-all duration-300 ${isIntegrated ? 'w-full h-full rounded-none border-none' : (isFullscreen ? 'fixed inset-0 w-screen h-screen z-50 rounded-none' : 'w-[1100px] h-[750px]')}`}>
             {/* Header Bar */}
             <div className="h-14 bg-black/40 border-b border-white/5 flex items-center justify-between px-6 z-20 shrink-0">
                 <div className="flex items-center space-x-4">
@@ -182,14 +183,16 @@ export default function DroneDetailPanel({ drone, onClose }: DroneDetailProps) {
                     </button>
                 </div>
 
-                <div className="flex items-center space-x-3">
-                    <button onClick={() => setIsFullscreen(!isFullscreen)} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-hud-text-muted hover:text-white transition-colors">
-                        <Maximize2 className="w-4 h-4" />
-                    </button>
-                    <button onClick={onClose} className="w-8 h-8 rounded-full bg-hud-danger/10 hover:bg-hud-danger/30 flex items-center justify-center text-hud-danger border border-hud-danger/20 transition-colors">
-                        <X className="w-4 h-4" />
-                    </button>
-                </div>
+                {!isIntegrated && (
+                    <div className="flex items-center space-x-3">
+                        <button onClick={() => setIsFullscreen(!isFullscreen)} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-hud-text-muted hover:text-white transition-colors">
+                            <Maximize2 className="w-4 h-4" />
+                        </button>
+                        <button onClick={onClose} className="w-8 h-8 rounded-full bg-hud-danger/10 hover:bg-hud-danger/30 flex items-center justify-center text-hud-danger border border-hud-danger/20 transition-colors">
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                )}
             </div>
 
             <div className="flex-1 flex w-full h-[calc(100%-56px)] bg-black/20">

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Map, { Marker, MapRef, Layer, Source, Popup } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { X, Building2 } from 'lucide-react';
@@ -44,6 +44,63 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
     });
     const [hoveredZone, setHoveredZone] = useState<{ name: string; x: number; y: number } | null>(null);
     const [selectedBaseId, setSelectedBaseId] = useState<string | null>(null);
+
+    // 1. Refactored Mission Route Logic (Unified Source & Segment Detection)
+    const missionData = useMemo(() => {
+        if (mapMode !== 'nav' || !selectedDroneId) return null;
+        const targetDrone = drones.find(d => d.drone_id === selectedDroneId);
+        if (!targetDrone || !targetDrone.fleet_mission) return null;
+
+        const route = targetDrone.fleet_mission.route;
+        const dronePos: [number, number] = [targetDrone.navigation.lon, targetDrone.navigation.lat];
+
+        // Find the closest SEGMENT (i, i+1) to the drone
+        // This is more robust than closest waypoint
+        let minDistance = Infinity;
+        let segmentIdx = 0;
+
+        for (let i = 0; i < route.length - 1; i++) {
+            const p1 = route[i];
+            const p2 = route[i+1];
+            
+            // Simple Euclidean distance to the midpoint of the segment as a heuristic
+            // or distance to the line segment.
+            const midX = (p1[0] + p2[0]) / 2;
+            const midY = (p1[1] + p2[1]) / 2;
+            const dist = Math.sqrt(Math.pow(midX - dronePos[0], 2) + Math.pow(midY - dronePos[1], 2));
+            
+            if (dist < minDistance) {
+                minDistance = dist;
+                segmentIdx = i;
+            }
+        }
+
+        // Split logic: 
+        // Passed = route from 0 to segmentIdx, then drone position
+        // Future = drone position, then route from segmentIdx+1 to end
+        const passedCoords = [...route.slice(0, segmentIdx + 1), dronePos];
+        const futureCoords = [dronePos, ...route.slice(segmentIdx + 1)];
+
+        return {
+            geojson: {
+                type: 'FeatureCollection',
+                features: [
+                    {
+                        type: 'Feature',
+                        properties: { status: 'passed' },
+                        geometry: { type: 'LineString', coordinates: passedCoords }
+                    },
+                    {
+                        type: 'Feature',
+                        properties: { status: 'future' },
+                        geometry: { type: 'LineString', coordinates: futureCoords }
+                    }
+                ]
+            } as any,
+            start: targetDrone.fleet_mission.start_point,
+            end: targetDrone.fleet_mission.end_point
+        };
+    }, [drones, selectedDroneId, mapMode]);
 
     const BASES_METADATA = [
         {
@@ -132,6 +189,7 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                     mapStyle="mapbox://styles/mapbox/navigation-night-v1"
                     mapboxAccessToken={MAPBOX_TOKEN}
                     attributionControl={false}
+                    style={{ width: '100%', height: '100%' }}
                     onMouseMove={e => {
                         const features = e.target.queryRenderedFeatures(e.point, {
                             layers: ['no-fly-poly-fill', 'no-fly-point-fill']
@@ -352,38 +410,58 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                         />
                     )}
 
-                    {/* Navigation Route Path Rendering */}
-                    {mapMode === 'nav' && selectedDroneId && drones.find(d => d.drone_id === selectedDroneId)?.fleet_mission && (
-                        <>
-                            <Source
-                                id="mission-route-source"
-                                type="geojson"
-                                data={{
-                                    type: 'Feature',
-                                    properties: {},
-                                    geometry: {
-                                        type: 'LineString',
-                                        coordinates: drones.find(d => d.drone_id === selectedDroneId)!.fleet_mission!.route
-                                    }
-                                } as any}
-                            >
-                                <Layer
-                                    id="mission-route-line"
-                                    type="line"
-                                    layout={{ 'line-join': 'round', 'line-cap': 'round' }}
-                                    paint={{
-                                        'line-color': '#eab308',
-                                        'line-width': 6,
-                                        'line-dasharray': [1, 1],
-                                        'line-opacity': 1
-                                    }}
-                                />
-                            </Source>
+                    {/* Navigation Route Path Rendering (Unified Source) */}
+                    {missionData && (
+                        <Source id="mission-route-unified-source" type="geojson" data={missionData.geojson}>
+                            {/* 1. Passed Route Segment Style */}
+                            <Layer
+                                id="mission-route-passed-line"
+                                type="line"
+                                filter={['==', ['get', 'status'], 'passed']}
+                                layout={{ 'line-join': 'round', 'line-cap': 'round' }}
+                                paint={{
+                                    'line-color': '#eab308',
+                                    'line-width': 4,
+                                    'line-opacity': 0.12
+                                }}
+                            />
 
-                            <Marker longitude={drones.find(d => d.drone_id === selectedDroneId)!.fleet_mission!.start_point[0]} latitude={drones.find(d => d.drone_id === selectedDroneId)!.fleet_mission!.start_point[1]} anchor="bottom">
+                            {/* 2. Future Route Segment Style */}
+                            <Layer
+                                id="mission-route-future-line"
+                                type="line"
+                                filter={['==', ['get', 'status'], 'future']}
+                                layout={{ 'line-join': 'round', 'line-cap': 'round' }}
+                                paint={{
+                                    'line-color': '#eab308',
+                                    'line-width': 6,
+                                    'line-dasharray': [1, 1],
+                                    'line-opacity': 1
+                                }}
+                            />
+                            
+                            {/* 3. Future Path Glow Effect */}
+                            <Layer
+                                id="mission-route-future-glow"
+                                type="line"
+                                filter={['==', ['get', 'status'], 'future']}
+                                layout={{ 'line-join': 'round', 'line-cap': 'round' }}
+                                paint={{
+                                    'line-color': '#eab308',
+                                    'line-width': 12,
+                                    'line-blur': 12,
+                                    'line-opacity': 0.3
+                                }}
+                            />
+                        </Source>
+                    )}
+
+                    {missionData && (
+                        <>
+                            <Marker longitude={missionData.start[0]} latitude={missionData.start[1]} anchor="bottom">
                                 <div className="w-4 h-4 rounded-full bg-white border-4 border-hud-accent shadow-lg mb-1" />
                             </Marker>
-                            <Marker longitude={drones.find(d => d.drone_id === selectedDroneId)!.fleet_mission!.end_point[0]} latitude={drones.find(d => d.drone_id === selectedDroneId)!.fleet_mission!.end_point[1]} anchor="bottom">
+                            <Marker longitude={missionData.end[0]} latitude={missionData.end[1]} anchor="bottom">
                                 <div className="flex flex-col items-center hud-bounce-once">
                                     <div className="text-xs bg-hud-warning text-black font-bold px-2 py-0.5 rounded shadow whitespace-nowrap">TARGET</div>
                                     <div className="w-1 h-4 bg-hud-warning" />
@@ -441,23 +519,7 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                 </div>
             )}
 
-            {/* OVERLAY UI MARKERS (Always bright, outside the filtered div if possible, 
-                but react-map-gl markers are tied to the Map. 
-                Instead, we apply the filter only to the Map's canvas via CSS class if we had more control, 
-                or we just accept that markers inside the map are also filtered.
-                Wait, I can put the Markers OUTSIDE the filtered div but they won't move with the map.
-                
-                Correct way: CSS to target only map canvas. Let's try that.
-            */}
-
-            {/* Putting markers back into a second Map instance or a fixed overlay is complex.
-                Let's use a simpler trick: increase the marker's own brightness/opacity to compensate.
-            */}
-            <div className="absolute inset-0 pointer-events-none z-20">
-                {/* Visual Fix: We'll render the same markers here but they need to be synced.
-                    Actually, let's just make the markers VIBRANT inside.
-                */}
-            </div>
+            <div className="absolute inset-0 pointer-events-none z-20" />
 
             <div className="absolute inset-0 z-30 pointer-events-none">
                 {/* Re-rendering markers in a clear layer while the map stays dark underneath */}
@@ -465,6 +527,7 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                     {...viewState}
                     mapStyle="transparent"
                     mapboxAccessToken={MAPBOX_TOKEN}
+                    style={{ width: '100%', height: '100%' }}
                 >
                     {drones.map(drone => {
                         // 3D View (Laser/Model) is now STRICTLY for 'focus' mode
