@@ -191,8 +191,20 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                     attributionControl={false}
                     style={{ width: '100%', height: '100%' }}
                     onMouseMove={e => {
-                        const features = e.target.queryRenderedFeatures(e.point, {
-                            layers: ['no-fly-poly-fill', 'no-fly-point-fill']
+                        if (!showNoFlyZones) {
+                            if (hoveredZone) setHoveredZone(null);
+                            return;
+                        }
+
+                        const map = e.target;
+                        const layers = ['no-fly-poly-fill', 'no-fly-point-fill'];
+                        
+                        // Check if layers actually exist in the style to avoid Mapbox errors
+                        const existingLayers = layers.filter(id => map.getLayer(id));
+                        if (existingLayers.length === 0) return;
+
+                        const features = map.queryRenderedFeatures(e.point, {
+                            layers: existingLayers
                         });
 
                         if (features.length > 0) {
@@ -203,7 +215,7 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                                 y: e.point.y
                             });
                         } else {
-                            setHoveredZone(null);
+                            if (hoveredZone) setHoveredZone(null);
                         }
                     }}
                     onMouseLeave={() => setHoveredZone(null)}
@@ -216,6 +228,22 @@ export default function DroneMap({ drones, selectedDroneId, onSelectDrone, mapMo
                         } catch (err) {
                             console.error("Failed loading Mapbox GLTF Model:", err);
                         }
+
+                        // Remove traffic/incidents layers to suppress 404 errors
+                        const incidentLayers = [
+                            'mapbox-incidents-icons',
+                            'mapbox-incidents-lines',
+                            'mapbox-incidents-polygons-stroke',
+                            'mapbox-incidents-polygons-fill',
+                        ];
+                        incidentLayers.forEach(layerId => {
+                            try {
+                                if (map.getLayer(layerId)) map.removeLayer(layerId);
+                            } catch (_) {}
+                        });
+                        try {
+                            if (map.getSource('mapbox-incidents-v1')) map.removeSource('mapbox-incidents-v1');
+                        } catch (_) {}
                     }}
                 >
                     {/* Dark Tint Overlay applied ONLY here - lightened to 20% */}

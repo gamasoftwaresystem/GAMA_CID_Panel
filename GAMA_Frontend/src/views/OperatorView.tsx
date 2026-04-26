@@ -78,6 +78,9 @@ export default function OperatorView({ onLogout }: OperatorViewProps) {
       onClick={() => {
         setSelectedDroneId(null);
         setExpandedCardId(null);
+        if (activeNavId === 'nav' || activeNavId === 'focus') {
+          setActiveNavId('map');
+        }
       }}
     >
       {/* Background Layer: Map */}
@@ -109,6 +112,7 @@ export default function OperatorView({ onLogout }: OperatorViewProps) {
               isSettingsActive={isSettingsOpen}
               isMenuExpanded={isMapMenuOpen}
               setIsMenuExpanded={setIsMapMenuOpen}
+              isDroneSelected={!!selectedDroneId}
             />
 
             <MapSettings
@@ -128,6 +132,7 @@ export default function OperatorView({ onLogout }: OperatorViewProps) {
           <div className="floating-panel-container">
             <UavCenterPanel
               isOpen={isUavCenterOpen}
+              onClose={() => setIsUavCenterOpen(false)}
               drones={drones}
               selectedDroneId={selectedDroneId}
               handleDroneSelect={handleDroneSelect}
@@ -138,6 +143,7 @@ export default function OperatorView({ onLogout }: OperatorViewProps) {
 
             <TacticalHubPanel
               isOpen={isControlCenterOpen}
+              onClose={() => setIsControlCenterOpen(false)}
               selectedDrone={selectedDrone}
               drones={drones}
               activeCommand={activeCommand}
@@ -146,6 +152,7 @@ export default function OperatorView({ onLogout }: OperatorViewProps) {
 
             <NetworkStatusPanel
               isOpen={isNetworkStatusOpen}
+              onClose={() => setIsNetworkStatusOpen(false)}
               onSelectDrone={handleDroneSelect}
               drones={drones}
             />

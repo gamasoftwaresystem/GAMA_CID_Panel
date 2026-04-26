@@ -1,15 +1,16 @@
-import React from 'react';
-import { Globe, Activity, Share2, RotateCcw, Video, Cpu, Settings, Radio, Crosshair, BellRing, Wind, WifiOff, MoreHorizontal } from 'lucide-react';
+import { Globe, Activity, Share2, RotateCcw, Video, Cpu, Settings, Radio, Crosshair, BellRing, Wind, WifiOff, MoreHorizontal, X } from 'lucide-react';
 import { Drone } from '../../types';
 
 interface NetworkStatusPanelProps {
     isOpen: boolean;
+    onClose: () => void;
     onSelectDrone: (id: string | null) => void;
     drones: Drone[];
 }
 
 export const NetworkStatusPanel: React.FC<NetworkStatusPanelProps> = ({
     isOpen,
+    onClose,
     onSelectDrone,
     drones
 }) => {
@@ -35,9 +36,18 @@ export const NetworkStatusPanel: React.FC<NetworkStatusPanelProps> = ({
                             <span className="text-[7px] font-bold text-white/20 uppercase tracking-[0.3em] mt-1.5 font-mono">SIGNAL_INTEGRITY_v2.1</span>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-hud-accent/[0.03] border border-hud-accent/20">
-                        <div className="w-1 h-1 rounded-full bg-hud-accent shadow-[0_0_6px_rgba(94,234,212,0.6)]" />
-                        <span className="text-[8px] font-black text-hud-accent uppercase tracking-widest leading-none">Nominal</span>
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-hud-accent/[0.03] border border-hud-accent/20">
+                            <div className="w-1 h-1 rounded-full bg-hud-accent shadow-[0_0_6px_rgba(94,234,212,0.6)]" />
+                            <span className="text-[8px] font-black text-hud-accent uppercase tracking-widest leading-none">Nominal</span>
+                        </div>
+                        <button
+                            onClick={onClose}
+                            className="p-1.5 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-all group"
+                            aria-label="Close"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
                     </div>
                 </div>
 

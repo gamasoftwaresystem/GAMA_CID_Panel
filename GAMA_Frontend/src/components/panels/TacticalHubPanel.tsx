@@ -1,10 +1,11 @@
 import React from 'react';
 import TechnicalHub from '../TechnicalHub/TechnicalHub';
 import { Drone } from '../../types';
-import { Radio } from 'lucide-react';
+import { Radio, X } from 'lucide-react';
 
 interface TacticalHubPanelProps {
     isOpen: boolean;
+    onClose: () => void;
     selectedDrone: Drone | undefined;
     drones: Drone[];
     activeCommand: string | null;
@@ -13,6 +14,7 @@ interface TacticalHubPanelProps {
 
 export const TacticalHubPanel: React.FC<TacticalHubPanelProps> = ({
     isOpen,
+    onClose,
     selectedDrone,
     drones
 }) => {
@@ -28,6 +30,13 @@ export const TacticalHubPanel: React.FC<TacticalHubPanelProps> = ({
                             {selectedDrone ? `General Information: ${selectedDrone.drone_id}` : 'General Information: Fleet Info'}
                         </h2>
                     </div>
+                    <button
+                        onClick={onClose}
+                        className="p-1.5 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-all group"
+                        aria-label="Close"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
                 </div>
 
                 <div className="flex-1 flex min-h-0 min-w-0">
