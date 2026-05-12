@@ -74,7 +74,7 @@ export default function OperatorView({ onLogout }: OperatorViewProps) {
 
   return (
     <div
-      className="w-screen h-screen overflow-hidden text-hud-text relative bg-hud-bg animate-in fade-in duration-500"
+      className="fixed inset-0 overflow-hidden text-hud-text bg-hud-bg animate-in fade-in duration-500"
       onClick={() => {
         setSelectedDroneId(null);
         setExpandedCardId(null);

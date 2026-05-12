@@ -27,6 +27,16 @@
 }
 
 @layer base {
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-height: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
+
   body {
     background-color: var(--color-hud-bg);
     color: var(--color-hud-text);
